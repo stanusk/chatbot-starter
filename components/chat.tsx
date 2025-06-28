@@ -3,7 +3,7 @@
 import cn from "classnames";
 import { toast } from "sonner";
 import { useChat } from "@ai-sdk/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Messages } from "./messages";
 import { modelID, models } from "@/lib/models";
 import { Footnote } from "./footnote";
@@ -15,16 +15,65 @@ import {
   UncheckedSquare,
 } from "./icons";
 import { Input } from "./input";
+import { supabase } from "@/lib/supabase";
 
 export function Chat() {
   const [input, setInput] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<modelID>("sonnet-3.7");
   const [isReasoningEnabled, setIsReasoningEnabled] = useState<boolean>(true);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get user session on component mount
+  useEffect(() => {
+    if (!supabase) {
+      console.warn("Supabase not initialized - running without authentication");
+      return;
+    }
+
+    const getSession = async () => {
+      const {
+        data: { session },
+      } = await supabase!.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+      }
+    };
+
+    getSession();
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        setUserId(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { messages, append, status, stop } = useChat({
-    id: "primary",
+    id: sessionId || "primary",
+    api: "/api/chat",
+    body: {
+      selectedModelId,
+      isReasoningEnabled,
+      sessionId,
+      userId,
+    },
     onError: () => {
       toast.error("An error occurred, please try again!");
+    },
+    onResponse: (response) => {
+      // Extract session ID from response headers if available
+      const newSessionId = response.headers.get("X-Session-ID");
+      if (newSessionId && !sessionId) {
+        setSessionId(newSessionId);
+      }
     },
   });
 
@@ -37,7 +86,7 @@ export function Chat() {
         {
           "justify-between": messages.length > 0,
           "justify-center gap-4": messages.length === 0,
-        },
+        }
       )}
     >
       {messages.length > 0 ? (
@@ -50,6 +99,16 @@ export function Chat() {
           <div className="dark:text-zinc-500 text-zinc-400">
             What would you like me to think about today?
           </div>
+          {userId && (
+            <div className="text-sm dark:text-zinc-600 text-zinc-500 mt-2">
+              Signed in • Messages are being saved to your account
+            </div>
+          )}
+          {!userId && (
+            <div className="text-sm dark:text-zinc-600 text-zinc-500 mt-2">
+              Anonymous session • Messages are saved temporarily
+            </div>
+          )}
         </div>
       )}
 
@@ -70,7 +129,7 @@ export function Chat() {
                 "relative w-fit text-sm p-1.5 rounded-lg flex flex-row items-center gap-2 dark:hover:bg-zinc-600 hover:bg-zinc-200 cursor-pointer disabled:opacity-50",
                 {
                   "dark:bg-zinc-600 bg-zinc-200": isReasoningEnabled,
-                },
+                }
               )}
               onClick={() => {
                 setIsReasoningEnabled(!isReasoningEnabled);
@@ -115,7 +174,7 @@ export function Chat() {
                 {
                   "dark:bg-zinc-200 dark:text-zinc-500":
                     isGeneratingResponse || input === "",
-                },
+                }
               )}
               onClick={() => {
                 if (input === "") {

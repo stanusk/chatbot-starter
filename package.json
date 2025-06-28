@@ -2,11 +2,22 @@
   "name": "ai-sdk-preview-reasoning",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:link": "supabase link",
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase migration new",
+    "db:status": "supabase migration list",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "1.1.10",
@@ -14,6 +25,7 @@
     "@ai-sdk/fireworks": "^0.1.18",
     "@ai-sdk/groq": "^1.1.16",
     "@ai-sdk/react": "1.1.18",
+    "@supabase/supabase-js": "^2.50.2",
     "ai": "4.1.66",
     "classnames": "^2.5.1",
     "framer-motion": "^12.4.4",
