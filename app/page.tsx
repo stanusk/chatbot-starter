@@ -1,50 +1,20 @@
 "use client";
 
-import { useState, useRef } from "react";
 import { Sidebar, MainContent } from "@/components/layout";
-import { ChatHistoryRef } from "@/components/chat-history";
-import { User } from "@supabase/supabase-js";
-import { ChatMessage } from "@/lib/supabase";
-
-const NEW_CHAT_ID = "";
+import { useAuthContext, useChatContext } from "@/contexts";
 
 export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    null
-  );
-  const [selectedMessages, setSelectedMessages] = useState<ChatMessage[]>([]);
-  const chatHistoryRef = useRef<ChatHistoryRef>(null);
-
-  const handleAuthChange = (newUser: User | null) => {
-    setUser(newUser);
-  };
-
-  const handleSessionSelect = (sessionId: string, messages: ChatMessage[]) => {
-    if (sessionId === NEW_CHAT_ID) {
-      // Handle "New Chat" selection
-      handleNewChat();
-    } else {
-      setSelectedSessionId(sessionId);
-      setSelectedMessages(messages);
-    }
-    // Close sidebar on mobile when a session is selected
-    setSidebarOpen(false);
-  };
-
-  const handleNewChat = () => {
-    // Start a new chat - let the API create the session when first message is sent
-    setSelectedSessionId(null);
-    setSelectedMessages([]);
-  };
-
-  const handleChatUpdate = () => {
-    // Silently refresh chat history when new messages are sent (avoids blinking)
-    if (chatHistoryRef.current) {
-      chatHistoryRef.current.refreshSessionsSilently();
-    }
-  };
+  const { user } = useAuthContext();
+  const {
+    selectedSessionId,
+    selectedMessages,
+    sidebarOpen,
+    selectSession,
+    startNewChat,
+    setSidebarOpen,
+    handleChatUpdate,
+    chatHistoryRef,
+  } = useChatContext();
 
   return (
     <div className="flex h-screen bg-background">
@@ -53,8 +23,7 @@ export default function Home() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         user={user}
-        onAuthChange={handleAuthChange}
-        onSessionSelect={handleSessionSelect}
+        onSessionSelect={selectSession}
         currentSessionId={selectedSessionId}
       />
 
@@ -69,7 +38,7 @@ export default function Home() {
       <MainContent
         selectedSessionId={selectedSessionId}
         selectedMessages={selectedMessages}
-        onNewSession={handleNewChat}
+        onNewSession={startNewChat}
         onChatUpdate={handleChatUpdate}
         onMenuClick={() => setSidebarOpen(true)}
       />

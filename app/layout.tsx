@@ -7,6 +7,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { DeployButton } from "@/components/deploy-button";
 import { StarButton } from "@/components/star-button";
+import { AppProvider } from "@/contexts";
+import { GlobalUIIndicators } from "@/components/global-ui-indicators";
 
 export const metadata: Metadata = {
   title: "Garage Bot",
@@ -109,7 +111,10 @@ export default function RootLayout({
           </div>
         </div>
         <Toaster position="top-center" />
-        {children}
+        <AppProvider>
+          <GlobalUIIndicators />
+          {children}
+        </AppProvider>
       </body>
     </html>
   );

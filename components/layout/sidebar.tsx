@@ -4,10 +4,7 @@ import { ChatHistory } from "@/components/chat-history";
 import type { SidebarProps, ChatHistoryRef } from "@/types/components";
 
 export const Sidebar = forwardRef<ChatHistoryRef, SidebarProps>(
-  (
-    { isOpen, onClose, user, onAuthChange, onSessionSelect, currentSessionId },
-    ref
-  ) => {
+  ({ isOpen, onClose, user, onSessionSelect, currentSessionId }, ref) => {
     return (
       <div
         className={`
@@ -29,7 +26,7 @@ export const Sidebar = forwardRef<ChatHistoryRef, SidebarProps>(
           </div>
 
           <div className="p-4 border-b border-border">
-            <Auth onAuthChange={onAuthChange} />
+            <Auth />
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">

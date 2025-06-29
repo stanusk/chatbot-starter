@@ -45,7 +45,6 @@ export interface UseChatReturn {
 
 // Chat history hook types
 export interface UseChatHistoryOptions {
-  user: User | null;
   onSessionSelect?: (sessionId: string, messages: ChatMessage[]) => void;
 }
 

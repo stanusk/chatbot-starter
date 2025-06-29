@@ -4,9 +4,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useChat as useAISDKChat } from "@ai-sdk/react";
 import { UIMessage } from "ai";
 import { toast } from "sonner";
-import { supabase, ChatMessage } from "@/lib/supabase";
+import { ChatMessage } from "@/lib/supabase";
 import { modelID } from "@/lib/models";
 import type { ModelID } from "@/types/models";
+import { useAuthContext } from "@/contexts";
 
 // Custom options for this hook (extends the centralized type)
 interface UseChatOptions {
@@ -49,72 +50,11 @@ export function useChat({
   );
   const [isReasoningEnabled, setIsReasoningEnabled] = useState<boolean>(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
-
-  // Set client flag to prevent hydration mismatches
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Get user session on component mount
-  useEffect(() => {
-    // Early return if client-side rendering hasn't started
-    if (!isClient) {
-      return;
-    }
-
-    // Early return if supabase is not available
-    if (!supabase) {
-      console.warn("Supabase not initialized - running without authentication");
-      return;
-    }
-
-    const getSession = async () => {
-      try {
-        // Using type assertion since we've already checked supabase exists above
-        const supabaseClient = supabase as NonNullable<typeof supabase>;
-        const {
-          data: { session },
-        } = await supabaseClient.auth.getSession();
-        if (session?.user) {
-          setUserId(session.user.id);
-        }
-      } catch (error) {
-        console.error("Failed to get initial session:", error);
-      }
-    };
-
-    getSession();
-
-    // Listen for auth changes - supabase is guaranteed to exist here due to early return above
-    // Using type assertion since we've already checked supabase exists
-    const supabaseClient = supabase as NonNullable<typeof supabase>;
-    
-    let subscription: { unsubscribe: () => void } | null = null;
-    
-    try {
-      const {
-        data: { subscription: authSubscription },
-      } = supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (session?.user) {
-          setUserId(session.user.id);
-        } else {
-          setUserId(null);
-        }
-      });
-      subscription = authSubscription;
-    } catch (error) {
-      console.error("Failed to set up auth state listener:", error);
-    }
-
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
-  }, [isClient]);
+  
+  // Use auth context instead of duplicating auth logic
+  const { user, isClient } = useAuthContext();
+  const userId = user?.id || null;
 
   // Update session ID when a session is selected from history
   useEffect(() => {

@@ -1,28 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/hooks";
+import { useAuthContext } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { AuthProps } from "@/types/components";
 
-export function Auth({ onAuthChange }: AuthProps) {
-  const { user, loading, signIn, signOut } = useAuth();
+export function Auth() {
+  const { user, loading, isClient, signIn, signOut } = useAuthContext();
   const [email, setEmail] = useState("");
-  const [isClient, setIsClient] = useState(false);
-
-  // Set client flag to prevent hydration mismatches
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Notify parent component of auth changes
-  React.useEffect(() => {
-    if (isClient) {
-      onAuthChange(user);
-    }
-  }, [isClient, user, onAuthChange]);
 
   // Don't render anything until client-side hydration is complete
   if (!isClient) {

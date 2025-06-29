@@ -16,7 +16,6 @@ export interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
-  onAuthChange: (user: User | null) => void;
   onSessionSelect: (sessionId: string, messages: ChatMessage[]) => void;
   currentSessionId: string | null;
 }
@@ -58,10 +57,7 @@ export interface TextMessagePartProps {
   text: string;
 }
 
-// Auth component types
-export interface AuthProps {
-  onAuthChange: (user: User | null) => void;
-}
+// Auth component types - now uses context, no props needed
 
 // Chat history types
 export interface ChatHistoryProps {

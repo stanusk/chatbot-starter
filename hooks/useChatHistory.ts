@@ -2,25 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ChatSession, ChatMessage } from "@/lib/supabase";
-import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { formatRelativeDate } from "@/lib/date-utils";
 import { useSupabase } from "./useSupabase";
+import { useAuthContext } from "@/contexts";
 import type { UseChatHistoryOptions, UseChatHistoryReturn } from "@/types/hooks";
 
 export function useChatHistory({
-  user,
   onSessionSelect,
-}: UseChatHistoryOptions): UseChatHistoryReturn {
+}: Omit<UseChatHistoryOptions, 'user'>): UseChatHistoryReturn {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isClient, setIsClient] = useState(false);
   const { getSessions, getMessages } = useSupabase();
-
-  // Set client flag to prevent hydration mismatches
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const { user, isClient } = useAuthContext();
 
   const loadSessions = useCallback(async (showLoading = true) => {
     if (!isClient || !user) return;

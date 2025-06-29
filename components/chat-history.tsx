@@ -16,7 +16,6 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
       handleSessionClick,
       formatDate,
     } = useChatHistory({
-      user,
       onSessionSelect,
     });
 
