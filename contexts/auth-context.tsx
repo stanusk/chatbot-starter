@@ -44,19 +44,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   useEffect(() => {
-    if (!isClient || !supabase) {
-      if (!supabase) {
-        console.warn("Supabase not initialized - authentication disabled");
-      }
+    if (!isClient) return;
+
+    if (!supabase) {
+      console.warn("Supabase not initialized - authentication disabled");
       return;
     }
 
+    // Store supabase reference to ensure TypeScript knows it's not null
+    const supabaseClient = supabase;
+
     // Get initial session
     const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase!.auth.getSession();
-      setUser(session?.user || null);
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        setUser(session?.user || null);
+      } catch (error) {
+        console.error("Error getting session:", error);
+      }
     };
 
     getSession();
@@ -64,7 +71,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase!.auth.onAuthStateChange((event, session) => {
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
       // Only show toast for explicit sign in/out events, not initial session loading
       if (event === "SIGNED_IN" && session?.user) {

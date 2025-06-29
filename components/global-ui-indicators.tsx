@@ -4,6 +4,7 @@ import React from "react";
 import { useUIContext } from "@/contexts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AlertTriangleIcon, XIcon } from "@/components/icons";
 
 export function GlobalUIIndicators() {
   const { isGlobalLoading, loadingMessage, globalError, clearGlobalError } =
@@ -38,19 +39,7 @@ export function GlobalUIIndicators() {
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="text-destructive">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"
-                  />
-                </svg>
+                <AlertTriangleIcon className="h-5 w-5" />
               </div>
               <div className="flex-1">
                 <p className="font-medium text-destructive">Error</p>
@@ -62,19 +51,7 @@ export function GlobalUIIndicators() {
                 onClick={clearGlobalError}
                 className="h-6 w-6 p-0"
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <XIcon className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>

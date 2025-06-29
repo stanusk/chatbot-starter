@@ -43,7 +43,7 @@ interface ChatProviderProps {
   children: React.ReactNode;
 }
 
-const NEW_CHAT_ID = "";
+const NEW_CHAT_ID = "__NEW_CHAT__";
 
 export function ChatProvider({ children }: ChatProviderProps) {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
@@ -53,26 +53,21 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [sidebarOpen, setSidebarOpenState] = useState(false);
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
 
-  const selectSession = useCallback(
-    (sessionId: string, messages: ChatMessage[]) => {
-      if (sessionId === NEW_CHAT_ID) {
-        // Handle "New Chat" selection
-        startNewChat();
-      } else {
-        setSelectedSessionId(sessionId);
-        setSelectedMessages(messages);
-      }
-      // Close sidebar on mobile when a session is selected
-      setSidebarOpenState(false);
-    },
-    []
-  );
-
   const startNewChat = useCallback(() => {
     // Start a new chat - let the API create the session when first message is sent
     setSelectedSessionId(null);
     setSelectedMessages([]);
   }, []);
+
+  const selectSession = useCallback(
+    (sessionId: string, messages: ChatMessage[]) => {
+      setSelectedSessionId(sessionId === NEW_CHAT_ID ? null : sessionId);
+      setSelectedMessages(sessionId === NEW_CHAT_ID ? [] : messages);
+      // Close sidebar on mobile when a session is selected
+      setSidebarOpenState(false);
+    },
+    []
+  );
 
   const setSidebarOpen = useCallback((open: boolean) => {
     setSidebarOpenState(open);

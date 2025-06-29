@@ -1,20 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from "react";
-
-interface UIContextType {
-  // Loading states
-  isGlobalLoading: boolean;
-  loadingMessage: string | null;
-
-  // Error states
-  globalError: string | null;
-
-  // Actions
-  setGlobalLoading: (loading: boolean, message?: string) => void;
-  setGlobalError: (error: string | null) => void;
-  clearGlobalError: () => void;
-}
+import { UIContextType } from "@/types/contexts";
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
