@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 import { Textarea } from "@/components/ui/textarea";
 import type { InputProps } from "@/types/components";
 
@@ -28,7 +28,14 @@ export function Input({
           }
 
           if (isGeneratingResponse) {
-            toast.error("Please wait for the model to finish its response!");
+            ErrorHandlers.validationError(
+              "Cannot send message while generating response",
+              "Please wait for the model to finish its response!",
+              {
+                component: "Input",
+                action: "handleKeyPress",
+              }
+            );
             return;
           }
 

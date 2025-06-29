@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 
 interface AuthContextType {
   user: User | null;
@@ -68,9 +68,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(session?.user || null);
       // Only show toast for explicit sign in/out events, not initial session loading
       if (event === "SIGNED_IN" && session?.user) {
-        toast.success("Successfully signed in!");
+        // Success feedback for sign in - using dynamic import to avoid dependency
+        import("sonner").then(({ toast }) =>
+          toast.success("Successfully signed in!")
+        );
       } else if (event === "SIGNED_OUT") {
-        toast.success("Successfully signed out!");
+        // Success feedback for sign out - using dynamic import to avoid dependency
+        import("sonner").then(({ toast }) =>
+          toast.success("Successfully signed out!")
+        );
       }
     });
 
@@ -79,14 +85,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signIn = useCallback(async (email: string) => {
     if (!email) {
-      toast.error("Please enter your email");
+      ErrorHandlers.validationError(
+        "Please enter your email",
+        "Please enter your email",
+        {
+          component: "AuthProvider",
+          action: "signIn",
+        }
+      );
       return;
     }
 
     setLoading(true);
     try {
       if (!supabase) {
-        toast.error("Authentication not available");
+        ErrorHandlers.authError("Authentication not available", undefined, {
+          component: "AuthProvider",
+          action: "signIn",
+        });
         return;
       }
 
@@ -101,12 +117,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (error) {
-        toast.error(error.message);
+        ErrorHandlers.authError("Sign in failed", error, {
+          component: "AuthProvider",
+          action: "signInWithOtp",
+          metadata: { email },
+        });
       } else {
-        toast.success("Check your email for the login link!");
+        // Success feedback - using dynamic import to avoid dependency
+        import("sonner").then(({ toast }) =>
+          toast.success("Check your email for the login link!")
+        );
       }
-    } catch {
-      toast.error("An error occurred during sign in");
+    } catch (error) {
+      ErrorHandlers.authError("An error occurred during sign in", error, {
+        component: "AuthProvider",
+        action: "signIn",
+        metadata: { email },
+      });
     } finally {
       setLoading(false);
     }
@@ -116,16 +143,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoading(true);
     try {
       if (!supabase) {
-        toast.error("Authentication not available");
+        ErrorHandlers.authError("Authentication not available", undefined, {
+          component: "AuthProvider",
+          action: "signOut",
+        });
         return;
       }
 
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast.error(error.message);
+        ErrorHandlers.authError("Sign out failed", error, {
+          component: "AuthProvider",
+          action: "signOut",
+        });
       }
-    } catch {
-      toast.error("An error occurred during sign out");
+    } catch (error) {
+      ErrorHandlers.authError("An error occurred during sign out", error, {
+        component: "AuthProvider",
+        action: "signOut",
+      });
     } finally {
       setLoading(false);
     }

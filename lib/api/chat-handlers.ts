@@ -6,6 +6,7 @@
 import { Message } from "ai";
 import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages } from "@/lib/supabase";
 import type { AIStreamResult } from "@/types/api";
+import { ErrorHandlers } from "@/lib/error-handling";
 
 /**
  * Session management logic
@@ -19,7 +20,11 @@ export async function handleSessionManagement(sessionId: string | undefined, use
       const session = await createChatSession(userId, "New Chat");
       currentSessionId = session.id;
     } catch (error) {
-      console.error("Failed to create chat session:", error);
+      ErrorHandlers.supabaseError("Failed to create chat session", error, {
+        userId,
+        component: "handleSessionManagement",
+        action: "createChatSession"
+      });
       // Continue without session persistence if Supabase fails
       return null;
     }
@@ -59,7 +64,12 @@ export async function handleUserMessagePersistence(
       await handleTitleGeneration(sessionId, userMessage.content);
     }
   } catch (error) {
-    console.error("Failed to save user message:", error);
+    ErrorHandlers.supabaseError("Failed to save user message", error, {
+      sessionId,
+      component: "handleUserMessagePersistence",
+      action: "saveChatMessage",
+      metadata: { messageRole: "user" }
+    });
   }
 }
 
@@ -71,7 +81,12 @@ export async function handleTitleGeneration(sessionId: string, messageContent: s
     const newTitle = generateChatTitle(messageContent);
     await updateChatSessionTitle(sessionId, newTitle);
   } catch (error) {
-    console.error("Failed to generate/update chat title:", error);
+    ErrorHandlers.supabaseError("Failed to generate/update chat title", error, {
+      sessionId,
+      component: "handleTitleGeneration",
+      action: "updateChatSessionTitle",
+      metadata: { messageContent: messageContent.substring(0, 100) }
+    });
   }
 }
 
@@ -115,7 +130,17 @@ export async function handleAssistantMessagePersistence(
       }
     );
   } catch (error) {
-    console.error("Failed to save assistant message:", error);
+    ErrorHandlers.supabaseError("Failed to save assistant message", error, {
+      sessionId,
+      component: "handleAssistantMessagePersistence",
+      action: "saveChatMessage",
+      metadata: { 
+        messageRole: "assistant",
+        selectedModelId,
+        isReasoningEnabled,
+        responseLength: result.text?.length 
+      }
+    });
   }
 }
 

@@ -10,7 +10,7 @@ import {
   generateChatTitle,
 } from "@/lib/supabase";
 import type { ChatSession, ChatMessage } from "@/lib/supabase";
-import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 import type { UseSupabaseReturn } from "@/types/hooks";
 
 export function useSupabase(): UseSupabaseReturn {
@@ -19,9 +19,11 @@ export function useSupabase(): UseSupabaseReturn {
       const session = await createChatSession(userId, title);
       return session;
     } catch (error) {
-      console.error("Failed to create chat session:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to create chat session: ${errorMessage}`);
+      ErrorHandlers.supabaseError("Failed to create chat session", error, {
+        userId,
+        component: "useSupabase",
+        action: "createSession"
+      });
       return null;
     }
   }, []);
@@ -31,9 +33,11 @@ export function useSupabase(): UseSupabaseReturn {
       const sessions = await getChatSessions(userId);
       return sessions;
     } catch (error) {
-      console.error("Failed to get chat sessions:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to load chat sessions: ${errorMessage}`);
+      ErrorHandlers.supabaseError("Failed to get chat sessions", error, {
+        userId,
+        component: "useSupabase",
+        action: "getSessions"
+      });
       return [];
     }
   }, []);
@@ -43,9 +47,12 @@ export function useSupabase(): UseSupabaseReturn {
       await updateChatSessionTitle(sessionId, title);
       return true;
     } catch (error) {
-      console.error("Failed to update session title:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to update session title: ${errorMessage}`);
+      ErrorHandlers.supabaseError("Failed to update session title", error, {
+        sessionId,
+        component: "useSupabase",
+        action: "updateSessionTitle",
+        metadata: { title }
+      });
       return false;
     }
   }, []);
@@ -62,9 +69,12 @@ export function useSupabase(): UseSupabaseReturn {
       const message = await saveChatMessage(sessionId, role, content, reasoning, score, metadata);
       return message;
     } catch (error) {
-      console.error("Failed to save chat message:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to save message: ${errorMessage}`);
+      ErrorHandlers.supabaseError("Failed to save chat message", error, {
+        sessionId,
+        component: "useSupabase",
+        action: "saveMessage",
+        metadata: { role, contentLength: content.length }
+      });
       return null;
     }
   }, []);
@@ -74,9 +84,11 @@ export function useSupabase(): UseSupabaseReturn {
       const messages = await getChatMessages(sessionId);
       return messages;
     } catch (error) {
-      console.error("Failed to get chat messages:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to load messages: ${errorMessage}`);
+      ErrorHandlers.supabaseError("Failed to get chat messages", error, {
+        sessionId,
+        component: "useSupabase",
+        action: "getMessages"
+      });
       return [];
     }
   }, []);

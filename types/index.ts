@@ -5,4 +5,5 @@ export * from "./contexts";
 export * from "./database";
 export * from "./hooks";
 export * from "./models";
-export * from "./ui"; 
+export * from "./ui";
+export * from "./error-handling"; 

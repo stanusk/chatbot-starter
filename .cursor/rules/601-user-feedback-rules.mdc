@@ -21,10 +21,26 @@ Rules for providing appropriate user feedback in this chatbot application.
 - Handle loading states gracefully during network issues
 
 ### Error Handling
+- Use centralized `ErrorHandlers` from `@/lib/error-handling` for all errors
+- Always provide context: `{ component: "ComponentName", action: "actionName" }`
+- Use specific error types: `authError`, `supabaseError`, `aiProviderError`, `validationError`
 - Display clear error messages for AI provider failures
 - Show authentication errors with actionable guidance
 - Handle network errors with retry options
 - Provide fallback responses when AI is unavailable
+
+```typescript
+// Standard pattern for all error handling
+try {
+  await operation();
+} catch (error) {
+  ErrorHandlers.supabaseError("Operation failed", error, {
+    component: "ComponentName",
+    action: "operationName",
+    metadata: { relevantContext: "value" }
+  });
+}
+```
 
 ### Success Feedback
 - Avoid success messages for expected chat operations

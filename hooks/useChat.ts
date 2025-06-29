@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useChat as useAISDKChat } from "@ai-sdk/react";
 import { UIMessage } from "ai";
-import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 import { ChatMessage } from "@/lib/supabase";
 import { modelID } from "@/lib/models";
 import type { ModelID } from "@/types/models";
@@ -102,8 +102,14 @@ export function useChat({
       userId,
     },
     keepLastMessageOnError: true,
-    onError: () => {
-      toast.error("An error occurred, please try again!");
+    onError: (error) => {
+      ErrorHandlers.aiProviderError("Chat streaming error", error, {
+        sessionId: currentSessionId || undefined,
+        userId: userId || undefined,
+        component: "useChat",
+        action: "streamText",
+        metadata: { selectedModelId, isReasoningEnabled }
+      });
     },
     onResponse: handleResponse,
     onFinish: handleFinish,
@@ -143,9 +149,12 @@ export function useChat({
         
         setMessages(formattedMessages);
       } catch (error) {
-        console.error("Failed to format selected messages:", error);
-        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-        toast.error(`Failed to load chat messages: ${errorMessage}`);
+        ErrorHandlers.componentError("Failed to format selected messages", error, {
+          sessionId: selectedSessionId || undefined,
+          component: "useChat",
+          action: "formatSelectedMessages",
+          metadata: { messageCount: selectedMessages?.length }
+        });
         
         // Preserve previous messages state to avoid clearing the chat
         // Only clear if there were no previous messages

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { ChatSession, ChatMessage } from "@/lib/supabase";
-import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 import { formatRelativeDate } from "@/lib/date-utils";
 import { useSupabase } from "./useSupabase";
 import { useAuthContext } from "@/contexts";
@@ -26,10 +26,11 @@ export function useChatHistory({
       const userSessions = await getSessions(user.id);
       setSessions(userSessions);
     } catch (error) {
-      console.error("Failed to load chat sessions:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to load chat history: ${errorMessage}`);
+      ErrorHandlers.supabaseError("Failed to load chat sessions", error, {
+        userId: user?.id,
+        component: "useChatHistory",
+        action: "loadSessions"
+      });
     } finally {
       if (showLoading) {
         setLoading(false);
@@ -65,10 +66,11 @@ export function useChatHistory({
         const messages = await getMessages(session.id);
         onSessionSelect(session.id, messages);
       } catch (error) {
-        console.error("Failed to load chat messages:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
-        toast.error(`Failed to load chat messages: ${errorMessage}`);
+        ErrorHandlers.supabaseError("Failed to load chat messages", error, {
+          sessionId: session.id,
+          component: "useChatHistory",
+          action: "handleSessionClick"
+        });
       }
     }
   }, [onSessionSelect]);

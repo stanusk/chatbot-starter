@@ -3,16 +3,11 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-}
-
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error?: Error; resetError: () => void }>;
-}
+import { ErrorHandlers } from "@/lib/error-handling";
+import type {
+  ErrorBoundaryState,
+  ErrorBoundaryProps,
+} from "@/types/error-handling";
 
 export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
@@ -28,11 +23,30 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+    // Store error info in state for debugging
+    this.setState((prevState) => ({
+      ...prevState,
+      errorInfo,
+    }));
+
+    // Use centralized error handling for component errors
+    ErrorHandlers.componentError("Component error caught by boundary", error, {
+      component: "ErrorBoundary",
+      action: "componentDidCatch",
+      metadata: {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: true,
+      },
+    });
+
+    // Call custom error handler if provided
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
   resetError = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
   render() {
@@ -42,6 +56,7 @@ export class ErrorBoundary extends React.Component<
         return (
           <FallbackComponent
             error={this.state.error}
+            errorInfo={this.state.errorInfo}
             resetError={this.resetError}
           />
         );

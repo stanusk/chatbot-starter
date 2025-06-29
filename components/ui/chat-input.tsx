@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ModelSelector } from "@/components/ui/model-selector";
@@ -31,7 +31,14 @@ export function ChatInput({
       }
 
       if (isGeneratingResponse) {
-        toast.error("Please wait for the model to finish its response!");
+        ErrorHandlers.validationError(
+          "Cannot send message while generating response",
+          "Please wait for the model to finish its response!",
+          {
+            component: "ChatInput",
+            action: "handleKeyPress",
+          }
+        );
         return;
       }
 
