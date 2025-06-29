@@ -140,7 +140,7 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
 
         {/* New Chat entry */}
         <div
-          onClick={() => onSessionSelect && onSessionSelect("", [])}
+          onClick={() => onSessionSelect?.("", [])}
           className="p-3 rounded-lg cursor-pointer transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
         >
           <div className="flex justify-between items-start">
@@ -166,7 +166,9 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium truncate">
-                  {session.title && session.title !== "New Chat" ? session.title : "New Chat"}
+                  {session.title && session.title !== "New Chat"
+                    ? session.title
+                    : "New Chat"}
                 </h4>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {formatDate(session.updated_at)}

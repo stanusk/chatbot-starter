@@ -7,6 +7,8 @@ import { ChatHistory, ChatHistoryRef } from "@/components/chat-history";
 import { User } from "@supabase/supabase-js";
 import { ChatMessage } from "@/lib/supabase";
 
+const NEW_CHAT_ID = "";
+
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,7 +19,7 @@ export default function Home() {
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
 
   const handleSessionSelect = (sessionId: string, messages: ChatMessage[]) => {
-    if (sessionId === "") {
+    if (sessionId === NEW_CHAT_ID) {
       // Handle "New Chat" selection
       handleNewChat();
     } else {

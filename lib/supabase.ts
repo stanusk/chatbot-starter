@@ -49,6 +49,9 @@ export interface ChatMessage {
 }
 
 // Helper functions
+// Note: Using supabaseAdmin for session/message operations to ensure
+// reliable data persistence regardless of user authentication state.
+// This bypasses RLS and should only be used in server-side contexts.
 export async function createChatSession(
   userId?: string,
   title?: string
@@ -167,10 +170,9 @@ export async function updateChatSessionTitle(
 }
 
 // Generate a chat title from the first user message
-export function generateChatTitle(firstMessage: string): string {
+export function generateChatTitle(firstMessage: string, maxLength: number = 50): string {
   // Clean and truncate the message for a title
   const cleaned = firstMessage.trim().replace(/\n/g, ' ');
-  const maxLength = 50;
   
   if (cleaned.length <= maxLength) {
     return cleaned;

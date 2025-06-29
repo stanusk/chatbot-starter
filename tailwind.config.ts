@@ -43,13 +43,18 @@ export default {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
+  						chart: {
+				'1': 'hsl(var(--chart-1))',
+				'2': 'hsl(var(--chart-2))',
+				'3': 'hsl(var(--chart-3))',
+				'4': 'hsl(var(--chart-4))',
+				'5': 'hsl(var(--chart-5))'
+			},
+			chat: {
+				user: 'hsl(var(--chat-user))',
+				assistant: 'hsl(var(--chat-assistant))',
+				reasoning: 'hsl(var(--chat-reasoning))'
+			}
   		},
   		fontFamily: {
   			sans: [
@@ -59,11 +64,19 @@ export default {
   				'var(--font-geist-mono)'
   			]
   		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		}
+  				borderRadius: {
+			lg: 'var(--radius)',
+			md: 'calc(var(--radius) - 2px)',
+			sm: 'calc(var(--radius) - 4px)'
+		},
+		spacing: {
+			'18': '4.5rem',
+			'88': '22rem'
+		},
+		animation: {
+			'message-in': 'slideInFromRight 0.3s ease-out',
+			'thinking': 'pulse 2s infinite'
+		}
   	}
   },
   plugins: [require("tailwindcss-animate")],

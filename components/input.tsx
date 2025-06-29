@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface InputProps {
   input: string;
@@ -14,15 +15,12 @@ interface InputProps {
 export function Input({
   input,
   setInput,
-  selectedModelId,
   isGeneratingResponse,
-  isReasoningEnabled,
   onSubmit,
 }: InputProps) {
-
   return (
-    <textarea
-      className="mb-12 resize-none w-full min-h-12 outline-none bg-transparent placeholder:text-zinc-400"
+    <Textarea
+      className="resize-none w-full min-h-16 pr-20 pl-28 pb-12 pt-4 border-0 bg-transparent focus-visible:ring-0"
       placeholder="Send a message"
       value={input}
       autoFocus
