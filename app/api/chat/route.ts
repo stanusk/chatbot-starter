@@ -3,6 +3,11 @@ import { Message, smoothStream, streamText } from "ai";
 import { NextRequest } from "next/server";
 import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages } from "@/lib/supabase";
 
+/**
+ * Handles incoming chat POST requests by managing chat sessions, persisting user and assistant messages, and streaming AI-generated responses.
+ *
+ * Parses the request to extract chat messages, model selection, reasoning preference, and optional session or user IDs. Ensures a chat session exists, saves the latest user message, and updates the session title if it's the first user message. Streams an AI response using the selected model, optionally including reasoning, and saves the assistant's reply with metadata. Returns a streaming response with session tracking headers.
+ */
 export async function POST(request: NextRequest) {
   const {
     messages,

@@ -48,7 +48,14 @@ export interface ChatMessage {
   metadata?: Record<string, any>;
 }
 
-// Helper functions
+/**
+ * Creates a new chat session with an optional user ID and title.
+ *
+ * @param userId - The user ID to associate with the session, or undefined for an anonymous session
+ * @param title - The title of the chat session; defaults to "New Chat" if not provided
+ * @returns The newly created chat session
+ * @throws If the Supabase admin client is not initialized or the database operation fails
+ */
 export async function createChatSession(
   userId?: string,
   title?: string
@@ -72,6 +79,18 @@ export async function createChatSession(
   return data;
 }
 
+/**
+ * Saves a new chat message to the specified session and updates the session's last modified timestamp.
+ *
+ * @param sessionId - The ID of the chat session to associate with the message.
+ * @param role - The role of the message sender ("user", "assistant", or "system").
+ * @param content - The content of the chat message.
+ * @param reasoning - Optional reasoning or explanation for the message.
+ * @param score - Optional score or rating for the message.
+ * @param metadata - Optional additional metadata for the message.
+ * @returns The newly saved chat message.
+ * @throws If the Supabase admin client is not initialized or if the database operation fails.
+ */
 export async function saveChatMessage(
   sessionId: string,
   role: "user" | "assistant" | "system",
@@ -126,6 +145,14 @@ export async function getChatMessages(
   return data || [];
 }
 
+/**
+ * Retrieves chat sessions for a user or anonymous sessions.
+ *
+ * If a user ID is provided, returns sessions belonging to that user or sessions with no associated user (anonymous). If no user ID is given, returns only anonymous sessions.
+ *
+ * @param userId - The user ID to filter sessions by, or undefined to fetch only anonymous sessions
+ * @returns An array of chat sessions matching the criteria
+ */
 export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
   if (!supabase) {
     throw new Error("Supabase client not initialized");
@@ -150,6 +177,12 @@ export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
   return data || [];
 }
 
+/**
+ * Updates the title and last updated timestamp of a chat session.
+ *
+ * @param sessionId - The unique identifier of the chat session to update
+ * @param title - The new title for the chat session
+ */
 export async function updateChatSessionTitle(
   sessionId: string,
   title: string
@@ -166,7 +199,14 @@ export async function updateChatSessionTitle(
   if (error) throw error;
 }
 
-// Generate a chat title from the first user message
+/**
+ * Generates a concise chat title from the first user message.
+ *
+ * Trims whitespace, replaces newlines with spaces, and truncates the message to a maximum of 50 characters, attempting to cut at a word boundary. Appends an ellipsis if the title is truncated.
+ *
+ * @param firstMessage - The initial user message to generate a title from
+ * @returns A cleaned and truncated chat title
+ */
 export function generateChatTitle(firstMessage: string): string {
   // Clean and truncate the message for a title
   const cleaned = firstMessage.trim().replace(/\n/g, ' ');

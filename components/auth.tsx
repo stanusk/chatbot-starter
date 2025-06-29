@@ -10,6 +10,15 @@ interface AuthProps {
   onAuthChange: (user: User | null) => void;
 }
 
+/**
+ * React component for user authentication using Supabase, providing sign-in and sign-out functionality with magic link support.
+ *
+ * Renders a sign-in form for unauthenticated users and a sign-out button for authenticated users. Handles authentication state changes and notifies the parent component via a callback.
+ *
+ * @param user - The currently authenticated user, or null if not signed in.
+ * @param onAuthChange - Callback invoked with the current user or null when authentication state changes.
+ * @returns The authentication UI component.
+ */
 export function Auth({ user, onAuthChange }: AuthProps) {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");

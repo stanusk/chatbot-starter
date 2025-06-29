@@ -24,6 +24,16 @@ interface ChatProps {
   onChatUpdate?: () => void;
 }
 
+/**
+ * Renders an interactive AI chat interface with session management, model selection, and reasoning controls.
+ *
+ * The Chat component supports authenticated and anonymous sessions, allows users to select AI models, toggle reasoning features, and send messages. It synchronizes chat state with external session and message props, notifies parent components of session and chat updates, and manages user authentication status.
+ *
+ * @param selectedSessionId - The ID of the chat session to load, or null to start a new session.
+ * @param selectedMessages - An array of chat messages to preload into the chat.
+ * @param onNewSession - Callback invoked when a new chat session is created.
+ * @param onChatUpdate - Callback invoked when the chat updates, such as after receiving a new message or session change.
+ */
 export function Chat({
   selectedSessionId = null,
   selectedMessages = [],

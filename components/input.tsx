@@ -11,6 +11,11 @@ interface InputProps {
   onSubmit: () => void;
 }
 
+/**
+ * Renders a controlled textarea input for user messages with submission handling.
+ *
+ * The component updates its value via the provided setter and triggers the `onSubmit` callback when the Enter key is pressed (without Shift), provided the input is non-empty and no response is currently being generated. Displays an error toast if submission is attempted while a response is in progress.
+ */
 export function Input({
   input,
   setInput,

@@ -7,6 +7,13 @@ import { ChatHistory, ChatHistoryRef } from "@/components/chat-history";
 import { User } from "@supabase/supabase-js";
 import { ChatMessage } from "@/lib/supabase";
 
+/**
+ * Renders the main chat application interface, managing authentication, chat session selection, and chat history.
+ *
+ * Displays a responsive layout with a sidebar for authentication and chat history, and a main area for the active chat session. Handles user authentication, session selection, new chat creation, and updates to chat history.
+ *
+ * @returns The chat application's main UI component.
+ */
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
