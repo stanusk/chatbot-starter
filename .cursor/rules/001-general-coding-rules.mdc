@@ -19,6 +19,7 @@ Rules to be followed for analyzing, writing, debugging, planning, and refactorin
 - Apply immutability and pure functions where applicable
 - Use declarative programming patterns
 - Optimize for readability and maintainability
+- Always assume that a dev build with hot reload is being run, so don't try to run it manually yourself
 </critical>
 
 - Keep React components under 300 lines

@@ -1,0 +1,59 @@
+import { forwardRef } from "react";
+import { Auth } from "@/components/auth";
+import { ChatHistory, ChatHistoryRef } from "@/components/chat-history";
+import { User } from "@supabase/supabase-js";
+import { ChatMessage } from "@/lib/supabase";
+
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  user: User | null;
+  onAuthChange: (user: User | null) => void;
+  onSessionSelect: (sessionId: string, messages: ChatMessage[]) => void;
+  currentSessionId: string | null;
+}
+
+export const Sidebar = forwardRef<ChatHistoryRef, SidebarProps>(
+  (
+    { isOpen, onClose, user, onAuthChange, onSessionSelect, currentSessionId },
+    ref
+  ) => {
+    return (
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 w-80 bg-background border-r border-border transform transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0 lg:static lg:inset-0
+        `}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="text-lg font-semibold">AI Chat</h2>
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1 rounded-md hover:bg-accent hover:text-accent-foreground"
+              aria-label="Close sidebar"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-4 border-b border-border">
+            <Auth onAuthChange={onAuthChange} />
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            <ChatHistory
+              ref={ref}
+              user={user}
+              onSessionSelect={onSessionSelect}
+              currentSessionId={currentSessionId}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+Sidebar.displayName = "Sidebar";
