@@ -6,20 +6,7 @@ import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { formatRelativeDate } from "@/lib/date-utils";
 import { useSupabase } from "./useSupabase";
-
-interface UseChatHistoryOptions {
-  user: User | null;
-  onSessionSelect?: (sessionId: string, messages: ChatMessage[]) => void;
-}
-
-interface UseChatHistoryReturn {
-  sessions: ChatSession[];
-  loading: boolean;
-  refreshSessions: () => void;
-  refreshSessionsSilently: () => void;
-  handleSessionClick: (session: ChatSession) => Promise<void>;
-  formatDate: (dateString: string) => string;
-}
+import type { UseChatHistoryOptions, UseChatHistoryReturn } from "@/types/hooks";
 
 export function useChatHistory({
   user,

@@ -1,7 +1,8 @@
-import { modelID, myProvider } from "@/lib/models";
-import { Message, smoothStream, streamText } from "ai";
+import { myProvider } from "@/lib/models";
+import { smoothStream, streamText } from "ai";
 import { NextRequest } from "next/server";
 import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages } from "@/lib/supabase";
+import type { ChatRequestBody } from "@/types/api";
 
 export async function POST(request: NextRequest) {
   const {
@@ -10,13 +11,7 @@ export async function POST(request: NextRequest) {
     isReasoningEnabled,
     sessionId,
     userId,
-  }: {
-    messages: Array<Message>;
-    selectedModelId: modelID;
-    isReasoningEnabled: boolean;
-    sessionId?: string;
-    userId?: string;
-  } = await request.json();
+  }: ChatRequestBody = await request.json();
 
   // Use the provided session ID - don't create new ones
   let currentSessionId = sessionId;

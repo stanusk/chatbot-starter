@@ -1,6 +1,4 @@
-interface MobileHeaderProps {
-  onMenuClick: () => void;
-}
+import type { MobileHeaderProps } from "@/types/components";
 
 export function MobileHeader({ onMenuClick }: MobileHeaderProps) {
   return (

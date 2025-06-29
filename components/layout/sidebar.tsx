@@ -1,17 +1,7 @@
 import { forwardRef } from "react";
 import { Auth } from "@/components/auth";
-import { ChatHistory, ChatHistoryRef } from "@/components/chat-history";
-import { User } from "@supabase/supabase-js";
-import { ChatMessage } from "@/lib/supabase";
-
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  user: User | null;
-  onAuthChange: (user: User | null) => void;
-  onSessionSelect: (sessionId: string, messages: ChatMessage[]) => void;
-  currentSessionId: string | null;
-}
+import { ChatHistory } from "@/components/chat-history";
+import type { SidebarProps, ChatHistoryRef } from "@/types/components";
 
 export const Sidebar = forwardRef<ChatHistoryRef, SidebarProps>(
   (

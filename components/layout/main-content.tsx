@@ -1,14 +1,6 @@
 import { Chat } from "@/components/chat";
-import { ChatMessage } from "@/lib/supabase";
 import { MobileHeader } from "./mobile-header";
-
-interface MainContentProps {
-  selectedSessionId: string | null;
-  selectedMessages: ChatMessage[];
-  onNewSession: () => void;
-  onChatUpdate: () => void;
-  onMenuClick: () => void;
-}
+import type { MainContentProps } from "@/types/components";
 
 export function MainContent({
   selectedSessionId,

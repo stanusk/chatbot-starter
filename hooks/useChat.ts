@@ -6,19 +6,22 @@ import { UIMessage } from "ai";
 import { toast } from "sonner";
 import { supabase, ChatMessage } from "@/lib/supabase";
 import { modelID } from "@/lib/models";
+import type { ModelID } from "@/types/models";
 
+// Custom options for this hook (extends the centralized type)
 interface UseChatOptions {
   selectedSessionId?: string | null;
   selectedMessages?: ChatMessage[];
   onChatUpdate?: () => void;
 }
 
+// Use centralized type but extend with additional properties specific to this implementation
 interface UseChatReturn {
   // Chat state
   input: string;
   setInput: (input: string) => void;
-  selectedModelId: modelID;
-  setSelectedModelId: (model: modelID) => void;
+  selectedModelId: string;
+  setSelectedModelId: (model: string) => void;
   isReasoningEnabled: boolean;
   setIsReasoningEnabled: (enabled: boolean) => void;
   sessionId: string | null;
@@ -41,8 +44,8 @@ export function useChat({
   onChatUpdate,
 }: UseChatOptions): UseChatReturn {
   const [input, setInput] = useState<string>("");
-  const [selectedModelId, setSelectedModelId] = useState<modelID>(
-    (process.env.NEXT_PUBLIC_DEFAULT_MODEL as modelID) || "sonnet-3.7"
+  const [selectedModelId, setSelectedModelId] = useState<string>(
+    (process.env.NEXT_PUBLIC_DEFAULT_MODEL as string) || "sonnet-3.7"
   );
   const [isReasoningEnabled, setIsReasoningEnabled] = useState<boolean>(true);
   const [sessionId, setSessionId] = useState<string | null>(null);

@@ -7,10 +7,19 @@ alwaysApply: false
 
 Follow these instructions when working with TypeScript in this Next.js project.
 
-## Instructions
-- Define data structures with interfaces or types for type safety
+## Type Organization
 - Place types used within one file only at the end of that file
-- Place shared types in `lib/types.ts` or create specific `.types.ts` files
+- Use centralized types from `types/` directory for shared interfaces:
+  - `types/database.ts` - Supabase schema types
+  - `types/components.ts` - Component props
+  - `types/hooks.ts` - Hook return types
+  - `types/ui.ts` - UI component types
+  - `types/api.ts` - API request/response types
+- Import directly from specific type files: `from "@/types/components"`
+- Use `import type` for type-only imports
+
+## General Rules
+- Define data structures with interfaces or types for type safety
 - Avoid `any` type - utilize the type system fully
 - Use JSDoc comments for complex functions and keep them updated
 - Leverage TypeScript's strict mode features

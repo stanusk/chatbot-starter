@@ -9,11 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
-interface ModelSelectorProps {
-  selectedModelId: modelID;
-  onModelChange: (modelId: modelID) => void;
-}
+import type { ModelSelectorProps } from "@/types/ui";
 
 export function ModelSelector({
   selectedModelId,
@@ -24,7 +20,7 @@ export function ModelSelector({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 px-2">
           <span className="text-muted-foreground">
-            {models[selectedModelId]}
+            {models[selectedModelId as modelID]}
           </span>
           <ChevronDownIcon className="h-4 w-4 ml-1" />
         </Button>
@@ -33,7 +29,7 @@ export function ModelSelector({
         {Object.entries(models).map(([id, name]) => (
           <DropdownMenuItem
             key={id}
-            onClick={() => onModelChange(id as modelID)}
+            onClick={() => onModelChange(id)}
             className={selectedModelId === id ? "bg-accent" : ""}
           >
             {name}

@@ -7,9 +7,7 @@ import {
   wrapLanguageModel,
   defaultSettingsMiddleware,
 } from "ai";
-
-// Model ID constants
-export const SONNET_3_7_MODEL_ID = "sonnet-3.7" as const;
+import { SONNET_3_7_MODEL_ID, type ModelID } from "@/types/models";
 
 // custom provider with different model settings:
 export const myProvider = customProvider({
@@ -41,9 +39,14 @@ export const myProvider = customProvider({
   },
 });
 
-export type modelID = Parameters<(typeof myProvider)["languageModel"]>["0"];
+// Re-export types from centralized types for backward compatibility
+export type { ModelID, ModelDisplayNames } from "@/types/models";
+export { SONNET_3_7_MODEL_ID } from "@/types/models";
 
-export const models: Record<modelID, string> = {
+// Legacy export for backward compatibility
+export type modelID = ModelID;
+
+export const models: Record<ModelID, string> = {
   [SONNET_3_7_MODEL_ID]: "Claude Sonnet 3.7",
   "deepseek-r1": "DeepSeek-R1",
   "deepseek-r1-distill-llama-70b": "DeepSeek-R1 Llama 70B",

@@ -6,19 +6,11 @@ import { markdownComponents } from "./markdown-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon, SpinnerIcon } from "./icons";
-import { UIMessage } from "ai";
-import { UseChatHelpers } from "@ai-sdk/react";
-
-interface ReasoningPart {
-  type: "reasoning";
-  reasoning: string;
-  details: Array<{ type: "text"; text: string }>;
-}
-
-interface ReasoningMessagePartProps {
-  part: ReasoningPart;
-  isReasoning: boolean;
-}
+import type {
+  ReasoningMessagePartProps,
+  TextMessagePartProps,
+  MessagesProps,
+} from "@/types/components";
 
 export function ReasoningMessagePart({
   part,
@@ -64,7 +56,7 @@ export function ReasoningMessagePart({
               "cursor-pointer rounded-full dark:hover:bg-zinc-800 hover:bg-zinc-200",
               {
                 "dark:bg-zinc-800 bg-zinc-200": isExpanded,
-              },
+              }
             )}
             onClick={() => {
               setIsExpanded(!isExpanded);
@@ -93,7 +85,7 @@ export function ReasoningMessagePart({
                 </Markdown>
               ) : (
                 "<redacted>"
-              ),
+              )
             )}
 
             {/* <Markdown components={markdownComponents}>{reasoning}</Markdown> */}
@@ -104,21 +96,12 @@ export function ReasoningMessagePart({
   );
 }
 
-interface TextMessagePartProps {
-  text: string;
-}
-
 export function TextMessagePart({ text }: TextMessagePartProps) {
   return (
     <div className="flex flex-col gap-4">
       <Markdown components={markdownComponents}>{text}</Markdown>
     </div>
   );
-}
-
-interface MessagesProps {
-  messages: Array<UIMessage>;
-  status: UseChatHelpers["status"];
 }
 
 export function Messages({ messages, status }: MessagesProps) {
@@ -140,7 +123,7 @@ export function Messages({ messages, status }: MessagesProps) {
         <div
           key={message.id}
           className={cn(
-            "flex flex-col gap-4 last-of-type:mb-12 first-of-type:mt-16 w-full",
+            "flex flex-col gap-4 last-of-type:mb-12 first-of-type:mt-16 w-full"
           )}
         >
           <div

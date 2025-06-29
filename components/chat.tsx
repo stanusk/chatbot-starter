@@ -4,15 +4,8 @@ import cn from "classnames";
 import { useChat } from "@/hooks";
 import { Messages } from "./messages";
 import { Footnote } from "./footnote";
-import { ChatMessage } from "@/lib/supabase";
 import { ChatInput } from "@/components/ui";
-
-interface ChatProps {
-  selectedSessionId?: string | null;
-  selectedMessages?: ChatMessage[];
-  onNewSession?: () => void;
-  onChatUpdate?: () => void;
-}
+import type { ChatProps } from "@/types/components";
 
 export function Chat({
   selectedSessionId = null,

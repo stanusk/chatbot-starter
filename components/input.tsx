@@ -2,15 +2,7 @@
 
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-
-interface InputProps {
-  input: string;
-  setInput: (value: string) => void;
-  selectedModelId: string;
-  isGeneratingResponse: boolean;
-  isReasoningEnabled: boolean;
-  onSubmit: () => void;
-}
+import type { InputProps } from "@/types/components";
 
 export function Input({
   input,

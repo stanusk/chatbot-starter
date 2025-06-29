@@ -7,20 +7,9 @@ import { Button } from "@/components/ui/button";
 import { ModelSelector } from "@/components/ui/model-selector";
 import { ReasoningToggle } from "@/components/ui/reasoning-toggle";
 import { ArrowUpIcon, StopIcon } from "@/components/icons";
-import { modelID, SONNET_3_7_MODEL_ID } from "@/lib/models";
+import { SONNET_3_7_MODEL_ID } from "@/lib/models";
 import { cn } from "@/lib/utils";
-
-interface ChatInputProps {
-  input: string;
-  setInput: (value: string) => void;
-  selectedModelId: modelID;
-  setSelectedModelId: (modelId: modelID) => void;
-  isReasoningEnabled: boolean;
-  setIsReasoningEnabled: (enabled: boolean) => void;
-  isGeneratingResponse: boolean;
-  onSubmit: () => void;
-  onStop: () => void;
-}
+import type { ChatInputProps } from "@/types/ui";
 
 export function ChatInput({
   input,

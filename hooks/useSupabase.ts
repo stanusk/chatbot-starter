@@ -11,27 +11,7 @@ import {
 } from "@/lib/supabase";
 import type { ChatSession, ChatMessage } from "@/lib/supabase";
 import { toast } from "sonner";
-
-interface UseSupabaseReturn {
-  // Session operations
-  createSession: (userId?: string, title?: string) => Promise<ChatSession | null>;
-  getSessions: (userId?: string) => Promise<ChatSession[]>;
-  updateSessionTitle: (sessionId: string, title: string) => Promise<boolean>;
-  
-  // Message operations
-  saveMessage: (
-    sessionId: string,
-    role: "user" | "assistant" | "system",
-    content: string,
-    reasoning?: string,
-    score?: number,
-    metadata?: Record<string, unknown>
-  ) => Promise<ChatMessage | null>;
-  getMessages: (sessionId: string) => Promise<ChatMessage[]>;
-  
-  // Utility operations
-  generateTitle: (firstMessage: string, maxLength?: number) => string;
-}
+import type { UseSupabaseReturn } from "@/types/hooks";
 
 export function useSupabase(): UseSupabaseReturn {
   const createSession = useCallback(async (userId?: string, title?: string): Promise<ChatSession | null> => {

@@ -2,14 +2,10 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/hooks";
-import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-interface AuthProps {
-  onAuthChange: (user: User | null) => void;
-}
+import type { AuthProps } from "@/types/components";
 
 export function Auth({ onAuthChange }: AuthProps) {
   const { user, loading, signIn, signOut } = useAuth();

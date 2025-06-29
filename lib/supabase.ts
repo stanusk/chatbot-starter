@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { ChatSession, ChatMessage, MessageRole } from "@/types/database";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -27,26 +28,8 @@ export const supabaseAdmin =
       })
     : null;
 
-// Database types
-export interface ChatSession {
-  id: string;
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
-  title?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface ChatMessage {
-  id: string;
-  session_id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  reasoning?: string;
-  score?: number;
-  created_at: string;
-  metadata?: Record<string, unknown>;
-}
+// Re-export database types from centralized types for backward compatibility
+export type { ChatSession, ChatMessage, MessageRole } from "@/types/database";
 
 // Helper functions
 // Note: Using supabaseAdmin for session/message operations to ensure
@@ -77,7 +60,7 @@ export async function createChatSession(
 
 export async function saveChatMessage(
   sessionId: string,
-  role: "user" | "assistant" | "system",
+  role: MessageRole,
   content: string,
   reasoning?: string,
   score?: number,

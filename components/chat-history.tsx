@@ -2,19 +2,9 @@
 
 import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
 import { useChatHistory } from "@/hooks";
-import type { ChatMessage } from "@/lib/supabase";
-import { User } from "@supabase/supabase-js";
+import type { ChatHistoryProps, ChatHistoryRef } from "@/types/components";
 
-interface ChatHistoryProps {
-  user: User | null;
-  onSessionSelect?: (sessionId: string, messages: ChatMessage[]) => void;
-  currentSessionId?: string | null;
-}
-
-export interface ChatHistoryRef {
-  refreshSessions: () => void;
-  refreshSessionsSilently: () => void;
-}
+export type { ChatHistoryRef };
 
 export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
   ({ user, onSessionSelect, currentSessionId }, ref) => {

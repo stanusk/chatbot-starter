@@ -5,13 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useSupabase } from "./useSupabase";
-
-interface UseAuthReturn {
-  user: User | null;
-  loading: boolean;
-  signIn: (email: string) => Promise<void>;
-  signOut: () => Promise<void>;
-}
+import type { UseAuthReturn } from "@/types/hooks";
 
 export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null);
