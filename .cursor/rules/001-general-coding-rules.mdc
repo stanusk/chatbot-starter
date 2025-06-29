@@ -1,0 +1,42 @@
+---
+description: Rules to be followed for analyzing, writing, debugging, planning, and refactoring code in this Next.js/React chatbot project.
+globs: 
+alwaysApply: false
+---
+# General Coding Rules
+
+Rules to be followed for analyzing, writing, debugging, planning, and refactoring code in this Next.js/React chatbot project.
+
+<critical>
+- This is a Next.js 15 App Router project with React Server Components - follow Next.js patterns over traditional SPA patterns
+- WHENEVER YOU'RE USING THESE RULES, always include "BASED ON CODE RULES" in the first line
+</critical>
+
+## Instructions
+
+<critical>
+- ALWAYS follow general best practices unless instructed otherwise
+- Apply immutability and pure functions where applicable
+- Use declarative programming patterns
+- Optimize for readability and maintainability
+</critical>
+
+- Keep React components under 300 lines
+- Keep utility functions and hooks under 200 lines
+- Use [003-refactoring-rules.mdc](mdc:.cursor/rules/003-refactoring-rules.mdc) when files exceed ideal size
+- Name functions based on what they do, not what they react to
+
+### Project Structure
+- Keep components focused on single responsibility
+- Place shared components in `components/` directory
+- Place shared utilities in `lib/` directory
+- Place custom hooks in `hooks/` directory
+- Maintain reasonable DRY principles
+- Break complex components into smaller, composable parts
+
+### React Patterns
+- Prefer React Server Components when possible
+- Use Client Components only when necessary (interactivity, hooks, browser APIs)
+- Use custom hooks for complex stateful logic
+- Extract reusable UI patterns into separate components
+- Keep business logic separate from presentation logic

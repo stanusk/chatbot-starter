@@ -1,5 +1,5 @@
 ---
-description: Apply when creating commits, reviewing changes, or pushing code
+description: 
 globs: 
 alwaysApply: false
 ---

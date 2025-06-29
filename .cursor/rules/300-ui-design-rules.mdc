@@ -1,0 +1,53 @@
+---
+description: Rules for implementing UI components and styling in this Next.js chatbot project.
+globs: 
+alwaysApply: false
+---
+# UI & Design Rules
+
+Rules for implementing UI components and styling in this Next.js chatbot project.
+
+<critical>
+- For comprehensive patterns and examples, reference `documentation/design_system_style_guide.md`
+- This file contains AI-focused guidance; the style guide contains detailed implementation patterns
+</critical>
+
+## Context
+- When creating or modifying React components
+- When implementing shadcn/ui components
+- When writing Tailwind CSS classes
+- When designing chat interface elements
+
+## Instructions
+
+<critical>
+- WHENEVER YOU'RE USING THESE RULES, START WITH "BASED ON OUR DESIGN SYSTEM"
+- ALWAYS use design tokens (CSS custom properties) instead of arbitrary values
+- ALWAYS check if shadcn/ui has a component before creating custom ones
+- Follow the component creation checklist from the design system style guide
+- Use `class-variance-authority` for component variants when needed
+</critical>
+
+### Design Token Usage
+- Colors: Use `bg-background`, `text-foreground`, `bg-primary`, etc. (never arbitrary colors)
+- Spacing: Use design system scale (`p-4`, `gap-4`, `mb-6`) over arbitrary values
+- Chat colors: Use `bg-chat-user`, `bg-chat-assistant`, `bg-chat-reasoning`
+- Border radius: Use `rounded-lg`, `rounded-md`, `rounded-sm` (based on `--radius`)
+
+### Component Patterns
+- Build through composition, not monolithic components
+- Use `forwardRef` for all UI primitives
+- Follow variant-based component pattern with `cva`
+- Import from barrel exports: `import { Button, Card } from "@/components/ui"`
+
+### Chat-Specific UI
+- Follow established message bubble patterns
+- Use consistent spacing and typography for readability
+- Implement proper loading states for streaming responses
+- Maintain chat history scroll behavior patterns
+
+### Accessibility
+- Ensure proper keyboard navigation for chat interface
+- Use semantic HTML for screen readers
+- Implement proper focus management for modal interactions
+- Follow ARIA patterns for dynamic content updates

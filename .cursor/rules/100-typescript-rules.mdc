@@ -1,0 +1,22 @@
+---
+description: 
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+# TypeScript Rules
+
+Follow these instructions when working with TypeScript in this Next.js project.
+
+## Instructions
+- Define data structures with interfaces or types for type safety
+- Place types used within one file only at the end of that file
+- Place shared types in `lib/types.ts` or create specific `.types.ts` files
+- Avoid `any` type - utilize the type system fully
+- Use JSDoc comments for complex functions and keep them updated
+- Leverage TypeScript's strict mode features
+
+### Next.js Specific
+- Properly type Server Component props and params
+- Use proper typing for API route handlers
+- Type database schema interfaces consistently with Supabase generated types
+- Use proper typing for Vercel AI SDK streaming responses
