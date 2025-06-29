@@ -1,14 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Chat } from "@/components/chat";
 import { Auth } from "@/components/auth";
-import { ChatHistory } from "@/components/chat-history";
+import { ChatHistory, ChatHistoryRef } from "@/components/chat-history";
 import { User } from "@supabase/supabase-js";
+import { ChatMessage } from "@/lib/supabase";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null
+  );
+  const [selectedMessages, setSelectedMessages] = useState<ChatMessage[]>([]);
+  const chatHistoryRef = useRef<ChatHistoryRef>(null);
+
+  const handleSessionSelect = (sessionId: string, messages: ChatMessage[]) => {
+    if (sessionId === "") {
+      // Handle "New Chat" selection
+      handleNewChat();
+    } else {
+      setSelectedSessionId(sessionId);
+      setSelectedMessages(messages);
+    }
+    // Close sidebar on mobile when a session is selected
+    setSidebarOpen(false);
+  };
+
+  const handleNewChat = () => {
+    // Start a new chat - let the API create the session when first message is sent
+    setSelectedSessionId(null);
+    setSelectedMessages([]);
+  };
+
+  const handleChatUpdate = () => {
+    // Silently refresh chat history when new messages are sent (avoids blinking)
+    if (chatHistoryRef.current) {
+      chatHistoryRef.current.refreshSessionsSilently();
+    }
+  };
 
   return (
     <div className="flex h-screen bg-white dark:bg-zinc-900">
@@ -35,8 +66,13 @@ export default function Home() {
             <Auth user={user} onAuthChange={setUser} />
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4">
-            <ChatHistory user={user} />
+          <div className="flex-1 overflow-y-auto p-4" suppressHydrationWarning>
+            <ChatHistory
+              ref={chatHistoryRef}
+              user={user}
+              onSessionSelect={handleSessionSelect}
+              currentSessionId={selectedSessionId}
+            />
           </div>
         </div>
       </div>
@@ -65,7 +101,12 @@ export default function Home() {
 
         {/* Chat component */}
         <div className="flex-1 flex justify-center">
-          <Chat />
+          <Chat
+            selectedSessionId={selectedSessionId}
+            selectedMessages={selectedMessages}
+            onNewSession={handleNewChat}
+            onChatUpdate={handleChatUpdate}
+          />
         </div>
       </div>
     </div>

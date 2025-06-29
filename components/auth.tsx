@@ -63,7 +63,7 @@ export function Auth({ user, onAuthChange }: AuthProps) {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}`,
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}` : undefined,
         },
       });
 

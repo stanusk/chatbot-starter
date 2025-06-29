@@ -1,7 +1,7 @@
 import { modelID, myProvider } from "@/lib/models";
 import { Message, smoothStream, streamText } from "ai";
 import { NextRequest } from "next/server";
-import { saveChatMessage, createChatSession } from "@/lib/supabase";
+import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     userId?: string;
   } = await request.json();
 
-  // Create a new session if one doesn't exist
+  // Use the provided session ID - don't create new ones
   let currentSessionId = sessionId;
   if (!currentSessionId) {
     try {
@@ -42,6 +42,16 @@ export async function POST(request: NextRequest) {
         undefined,
         { timestamp: userMessage.createdAt }
       );
+
+      // Check if this is the first user message and update title
+      const existingMessages = await getChatMessages(currentSessionId);
+      const userMessages = existingMessages.filter(msg => msg.role === "user");
+      
+      if (userMessages.length === 1) {
+        // This is the first user message, generate and update title
+        const newTitle = generateChatTitle(userMessage.content);
+        await updateChatSessionTitle(currentSessionId, newTitle);
+      }
     } catch (error) {
       console.error("Failed to save user message:", error);
     }
@@ -107,6 +117,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
+  
   return stream.toDataStreamResponse({
     sendReasoning: true,
     getErrorMessage: () => {

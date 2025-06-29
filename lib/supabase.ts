@@ -53,11 +53,11 @@ export async function createChatSession(
   userId?: string,
   title?: string
 ): Promise<ChatSession> {
-  if (!supabase) {
-    throw new Error("Supabase client not initialized");
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized");
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("chat_sessions")
     .insert({
       user_id: userId,
@@ -99,6 +99,13 @@ export async function saveChatMessage(
     .single();
 
   if (error) throw error;
+
+  // Update the session's updated_at timestamp
+  await supabaseAdmin
+    .from("chat_sessions")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", sessionId);
+
   return data;
 }
 
@@ -130,11 +137,52 @@ export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
     .order("updated_at", { ascending: false });
 
   if (userId) {
-    query = query.eq("user_id", userId);
+    // Get sessions for this user OR sessions with null user_id (anonymous sessions)
+    query = query.or(`user_id.eq.${userId},user_id.is.null`);
+  } else {
+    // If no userId provided, only get sessions with null user_id
+    query = query.is("user_id", null);
   }
 
   const { data, error } = await query;
 
   if (error) throw error;
   return data || [];
+}
+
+export async function updateChatSessionTitle(
+  sessionId: string,
+  title: string
+): Promise<void> {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized");
+  }
+
+  const { error } = await supabaseAdmin
+    .from("chat_sessions")
+    .update({ title, updated_at: new Date().toISOString() })
+    .eq("id", sessionId);
+
+  if (error) throw error;
+}
+
+// Generate a chat title from the first user message
+export function generateChatTitle(firstMessage: string): string {
+  // Clean and truncate the message for a title
+  const cleaned = firstMessage.trim().replace(/\n/g, ' ');
+  const maxLength = 50;
+  
+  if (cleaned.length <= maxLength) {
+    return cleaned;
+  }
+  
+  // Try to cut at a word boundary
+  const truncated = cleaned.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  
+  if (lastSpace > maxLength * 0.7) {
+    return truncated.substring(0, lastSpace) + '...';
+  }
+  
+  return truncated + '...';
 }

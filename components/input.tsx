@@ -1,6 +1,5 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { toast } from "sonner";
 
 interface InputProps {
@@ -9,6 +8,7 @@ interface InputProps {
   selectedModelId: string;
   isGeneratingResponse: boolean;
   isReasoningEnabled: boolean;
+  onSubmit: () => void;
 }
 
 export function Input({
@@ -17,17 +17,8 @@ export function Input({
   selectedModelId,
   isGeneratingResponse,
   isReasoningEnabled,
+  onSubmit,
 }: InputProps) {
-  const { append } = useChat({
-    id: "primary",
-    body: {
-      selectedModelId,
-      isReasoningEnabled,
-    },
-    onError: () => {
-      toast.error("An error occurred, please try again!");
-    },
-  });
 
   return (
     <textarea
@@ -48,17 +39,10 @@ export function Input({
 
           if (isGeneratingResponse) {
             toast.error("Please wait for the model to finish its response!");
-
             return;
           }
 
-          append({
-            role: "user",
-            content: input,
-            createdAt: new Date(),
-          });
-
-          setInput("");
+          onSubmit();
         }
       }}
     />
