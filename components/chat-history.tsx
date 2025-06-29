@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { getChatSessions, getChatMessages } from "@/lib/supabase";
-import type { ChatSession, ChatMessage } from "@/lib/supabase";
+import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
+import { useChatHistory } from "@/hooks";
+import type { ChatMessage } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
-import { toast } from "sonner";
 
 interface ChatHistoryProps {
   user: User | null;
@@ -19,86 +18,37 @@ export interface ChatHistoryRef {
 
 export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
   ({ user, onSessionSelect, currentSessionId }, ref) => {
-    const [sessions, setSessions] = useState<ChatSession[]>([]);
-    const [loading, setLoading] = useState(false);
+    const {
+      sessions,
+      loading,
+      refreshSessions,
+      refreshSessionsSilently,
+      handleSessionClick,
+      formatDate,
+    } = useChatHistory({
+      user,
+      onSessionSelect,
+    });
+
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-      if (user) {
-        loadSessions();
-      } else {
-        setSessions([]);
-      }
-    }, [user]);
-
-    const loadSessions = async (showLoading = true) => {
-      if (!user) return;
-
-      if (showLoading) {
-        setLoading(true);
-      }
-      try {
-        const userSessions = await getChatSessions(user.id);
-        setSessions(userSessions);
-      } catch (error) {
-        console.error("Failed to load chat sessions:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
-        toast.error(`Failed to load chat history: ${errorMessage}`);
-      } finally {
-        if (showLoading) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Expose refresh function for external use
-    const refreshSessions = () => {
-      if (user) {
-        loadSessions();
-      }
-    };
-
-    // Silent refresh without loading state (for frequent updates)
-    const refreshSessionsSilently = () => {
-      if (user) {
-        loadSessions(false);
-      }
-    };
+      setIsClient(true);
+    }, []);
 
     useImperativeHandle(ref, () => ({
       refreshSessions,
       refreshSessionsSilently,
     }));
 
-    const handleSessionClick = async (session: ChatSession) => {
-      if (onSessionSelect) {
-        try {
-          const messages = await getChatMessages(session.id);
-          onSessionSelect(session.id, messages);
-        } catch (error) {
-          console.error("Failed to load chat messages:", error);
-          const errorMessage =
-            error instanceof Error ? error.message : "Unknown error occurred";
-          toast.error(`Failed to load chat messages: ${errorMessage}`);
-        }
-      }
-    };
-
-    const formatDate = (dateString: string) => {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-      if (diffInHours < 1) {
-        return "Just now";
-      } else if (diffInHours < 24) {
-        return `${Math.floor(diffInHours)}h ago`;
-      } else if (diffInHours < 24 * 7) {
-        return `${Math.floor(diffInHours / 24)}d ago`;
-      } else {
-        return date.toLocaleDateString();
-      }
-    };
+    // Don't render user-dependent content until client-side hydration is complete
+    if (!isClient) {
+      return (
+        <div className="p-4 text-center text-zinc-500 dark:text-zinc-400">
+          Loading...
+        </div>
+      );
+    }
 
     if (!user) {
       return (

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ModelSelector } from "@/components/ui/model-selector";
 import { ReasoningToggle } from "@/components/ui/reasoning-toggle";
 import { ArrowUpIcon, StopIcon } from "@/components/icons";
-import { modelID } from "@/lib/models";
+import { modelID, SONNET_3_7_MODEL_ID } from "@/lib/models";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
@@ -80,14 +80,16 @@ export function ChatInput({
         <ReasoningToggle
           isEnabled={isReasoningEnabled}
           onToggle={() => setIsReasoningEnabled(!isReasoningEnabled)}
-          disabled={selectedModelId !== "sonnet-3.7"}
+          disabled={selectedModelId !== SONNET_3_7_MODEL_ID}
         />
 
         <div className="flex gap-2">
           <ModelSelector
             selectedModelId={selectedModelId}
             onModelChange={(modelId) => {
-              if (modelId !== "sonnet-3.7") {
+              // Auto-enable reasoning for models other than sonnet-3.7
+              // as they support/benefit from reasoning capabilities
+              if (modelId !== SONNET_3_7_MODEL_ID) {
                 setIsReasoningEnabled(true);
               }
               setSelectedModelId(modelId);

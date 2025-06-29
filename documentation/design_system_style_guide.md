@@ -28,7 +28,7 @@ This style guide documents the design system patterns, principles, and best prac
 
 ### Component Hierarchy
 
-```
+```text
 components/
 ├── ui/              # Design system primitives (shadcn/ui)
 ├── features/        # Feature-specific components

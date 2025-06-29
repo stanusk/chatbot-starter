@@ -1,0 +1,114 @@
+---
+description: Apply when creating commits, reviewing changes, or pushing code
+globs: 
+alwaysApply: false
+---
+# Git Commit and Workflow Guidelines
+
+## Requirements
+
+### Workflow Steps
+- Run `git add .` from the root of the workspace
+- Review all added changes before committing
+- Create a structured commit message following the format below
+
+<critical>
+- NEVER push changes to the remote branch
+</critical>
+
+### Commit Message Format
+```
+<type>(<scope>): <description>
+
+<body>
+
+<optional footer>
+```
+
+#### Header
+- **type**: One of the following categories that describe the kind of change:
+  - `feat`: A new feature
+  - `fix`: A bug fix
+  - `docs`: Changes to documentation
+  - `style`: Code style changes (white-space, formatting, etc.)
+  - `refactor`: Refactoring existing code (neither a new feature nor a bug fix)
+  - `test`: Adding or fixing tests
+  - `chore`: Changes to the build process or auxiliary tools
+  - `perf`: A change that improves performance
+  - `ci`: Changes to CI configuration files and scripts
+  - `build`: Changes that affect the build system or external dependencies
+  - `revert`: Revert a previous commit
+- **scope**: Component/module affected (optional but recommended)
+- **description**: Concise summary in imperative mood, max 72 characters
+
+#### Scope Guidelines
+
+For Next.js/React projects:
+- **Components**: Component name (e.g., "chat", "auth", "navbar")
+- **Pages/Routes**: Route path (e.g., "api/chat", "dashboard", "login")
+- **Hooks**: Hook name (e.g., "useAuth", "useLocalStorage")
+- **Utils/Lib**: Module name (e.g., "utils", "api-client", "auth-helpers")
+- **Database**: "db" or table name (e.g., "users", "sessions")
+- **Config**: "config" for Next.js, Tailwind, build configuration
+
+Examples:
+- `feat(chat): add message threading`
+- `fix(useAuth): prevent duplicate login calls`
+- `refactor(api/users): improve error handling`
+- `style(navbar): update mobile responsiveness`
+
+#### Body (Optional)
+
+The body provides additional context about the change. You should explain **what** and **why** rather than **how**.
+
+Use when:
+- Complex implementations need explanation
+- Bug fixes where cause/solution isn't obvious
+- Breaking changes or significant refactoring
+- Changes affecting multiple systems
+- Context about technical decisions is needed
+
+Skip when:
+- Simple feature additions
+- Minor bug fixes
+- Style/formatting changes
+- Straightforward updates
+
+Make sure to note every notable change but keep the description as short as possible.
+
+#### Footer
+
+The footer is used to reference issues, pull requests, or breaking changes. It can also contain any notable minor fixes unrelated to the main focus of the change.
+
+## Examples
+
+<example>
+  feat(auth): implement multi-factor authentication
+
+  This change improves security by requiring a second verification 
+  step during login. We're using time-based one-time passwords (TOTP)
+  as recommended by security audit findings from last quarter.
+
+  + fixed flickering button
+</example>
+
+<example>
+  docs(DEL-20): add comprehensive feature documentation for person-company assignment
+</example>
+
+<example>
+  feat(events): fixed a typo
+</example>
+
+<example type="invalid">
+  fixed stuff
+</example>
+
+<example type="invalid">
+  feat: add login feature
+
+  Added login feature to the app.
+</example> 
+
+
+

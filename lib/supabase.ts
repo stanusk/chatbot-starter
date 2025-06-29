@@ -34,7 +34,7 @@ export interface ChatSession {
   created_at: string;
   updated_at: string;
   title?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ChatMessage {
@@ -45,7 +45,7 @@ export interface ChatMessage {
   reasoning?: string;
   score?: number;
   created_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Helper functions
@@ -81,7 +81,7 @@ export async function saveChatMessage(
   content: string,
   reasoning?: string,
   score?: number,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<ChatMessage> {
   if (!supabaseAdmin) {
     throw new Error("Supabase admin client not initialized");

@@ -8,10 +8,13 @@ import {
   defaultSettingsMiddleware,
 } from "ai";
 
+// Model ID constants
+export const SONNET_3_7_MODEL_ID = "sonnet-3.7" as const;
+
 // custom provider with different model settings:
 export const myProvider = customProvider({
   languageModels: {
-    "sonnet-3.7": wrapLanguageModel({
+    [SONNET_3_7_MODEL_ID]: wrapLanguageModel({
       middleware: defaultSettingsMiddleware({
         settings: {
           providerMetadata: {
@@ -41,7 +44,7 @@ export const myProvider = customProvider({
 export type modelID = Parameters<(typeof myProvider)["languageModel"]>["0"];
 
 export const models: Record<modelID, string> = {
-  "sonnet-3.7": "Claude Sonnet 3.7",
+  [SONNET_3_7_MODEL_ID]: "Claude Sonnet 3.7",
   "deepseek-r1": "DeepSeek-R1",
   "deepseek-r1-distill-llama-70b": "DeepSeek-R1 Llama 70B",
 };

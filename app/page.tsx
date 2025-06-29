@@ -18,6 +18,10 @@ export default function Home() {
   const [selectedMessages, setSelectedMessages] = useState<ChatMessage[]>([]);
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
 
+  const handleAuthChange = (newUser: User | null) => {
+    setUser(newUser);
+  };
+
   const handleSessionSelect = (sessionId: string, messages: ChatMessage[]) => {
     if (sessionId === NEW_CHAT_ID) {
       // Handle "New Chat" selection
@@ -65,10 +69,10 @@ export default function Home() {
           </div>
 
           <div className="p-4 border-b border-zinc-200 dark:border-zinc-700">
-            <Auth user={user} onAuthChange={setUser} />
+            <Auth onAuthChange={handleAuthChange} />
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4" suppressHydrationWarning>
+          <div className="flex-1 overflow-y-auto p-4">
             <ChatHistory
               ref={chatHistoryRef}
               user={user}

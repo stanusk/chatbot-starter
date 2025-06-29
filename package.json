@@ -33,6 +33,7 @@
     "@radix-ui/react-toast": "^1.2.14",
     "@supabase/supabase-js": "^2.50.2",
     "ai": "4.1.66",
+    "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
