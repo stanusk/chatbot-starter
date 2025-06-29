@@ -35,13 +35,15 @@ interface UseChatReturn {
   stop: () => void;
 }
 
-export function useChatLogic({
+export function useChat({
   selectedSessionId = null,
   selectedMessages = [],
   onChatUpdate,
 }: UseChatOptions): UseChatReturn {
   const [input, setInput] = useState<string>("");
-  const [selectedModelId, setSelectedModelId] = useState<modelID>("sonnet-3.7");
+  const [selectedModelId, setSelectedModelId] = useState<modelID>(
+    (process.env.NEXT_PUBLIC_DEFAULT_MODEL as modelID) || "sonnet-3.7"
+  );
   const [isReasoningEnabled, setIsReasoningEnabled] = useState<boolean>(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -55,36 +57,60 @@ export function useChatLogic({
 
   // Get user session on component mount
   useEffect(() => {
-    if (!isClient || !supabase) {
-      if (!supabase) {
-        console.warn("Supabase not initialized - running without authentication");
-      }
+    // Early return if client-side rendering hasn't started
+    if (!isClient) {
+      return;
+    }
+
+    // Early return if supabase is not available
+    if (!supabase) {
+      console.warn("Supabase not initialized - running without authentication");
       return;
     }
 
     const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase!.auth.getSession();
-      if (session?.user) {
-        setUserId(session.user.id);
+      try {
+        // Using type assertion since we've already checked supabase exists above
+        const supabaseClient = supabase as NonNullable<typeof supabase>;
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (session?.user) {
+          setUserId(session.user.id);
+        }
+      } catch (error) {
+        console.error("Failed to get initial session:", error);
       }
     };
 
     getSession();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        setUserId(session.user.id);
-      } else {
-        setUserId(null);
-      }
-    });
+    // Listen for auth changes - supabase is guaranteed to exist here due to early return above
+    // Using type assertion since we've already checked supabase exists
+    const supabaseClient = supabase as NonNullable<typeof supabase>;
+    
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    try {
+      const {
+        data: { subscription: authSubscription },
+      } = supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          setUserId(session.user.id);
+        } else {
+          setUserId(null);
+        }
+      });
+      subscription = authSubscription;
+    } catch (error) {
+      console.error("Failed to set up auth state listener:", error);
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [isClient]);
 
   // Update session ID when a session is selected from history
@@ -101,6 +127,28 @@ export function useChatLogic({
 
   const currentSessionId = selectedSessionId || sessionId;
 
+  // Extract callback handlers for better readability and testability
+  const handleResponse = useCallback((response: Response) => {
+    // Extract session ID from response headers if available
+    const newSessionId = response.headers.get("X-Session-ID");
+    if (newSessionId && !sessionId && !selectedSessionId) {
+      // Set both ref (immediate) and state (for UI updates)
+      sessionIdRef.current = newSessionId;
+      setSessionId(newSessionId);
+      // Notify parent that a new session was created
+      if (onChatUpdate) {
+        onChatUpdate();
+      }
+    }
+  }, [sessionId, selectedSessionId, onChatUpdate]);
+
+  const handleFinish = useCallback(() => {
+    // Also notify when assistant response is complete
+    if (onChatUpdate) {
+      onChatUpdate();
+    }
+  }, [onChatUpdate]);
+
   const { messages, append, status, stop, setMessages } = useAISDKChat({
     id: selectedSessionId || sessionId || "primary",
     api: "/api/chat",
@@ -114,37 +162,54 @@ export function useChatLogic({
     onError: () => {
       toast.error("An error occurred, please try again!");
     },
-    onResponse: (response) => {
-      // Extract session ID from response headers if available
-      const newSessionId = response.headers.get("X-Session-ID");
-      if (newSessionId && !sessionId && !selectedSessionId) {
-        // Set both ref (immediate) and state (for UI updates)
-        sessionIdRef.current = newSessionId;
-        setSessionId(newSessionId);
-        // Notify parent that a new session was created
-        if (onChatUpdate) {
-          onChatUpdate();
-        }
-      }
-    },
-    onFinish: () => {
-      // Also notify when assistant response is complete
-      if (onChatUpdate) {
-        onChatUpdate();
-      }
-    },
+    onResponse: handleResponse,
+    onFinish: handleFinish,
   });
 
   // Load selected messages when a session is selected
   useEffect(() => {
     if (selectedMessages && selectedMessages.length > 0) {
-      const formattedMessages = selectedMessages.map((msg) => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        createdAt: new Date(msg.created_at),
-      }));
-      setMessages(formattedMessages);
+      try {
+        const formattedMessages = selectedMessages.map((msg) => {
+          // Validate required fields before processing
+          if (!msg || typeof msg.id !== 'string' || !msg.role || !msg.content) {
+            throw new Error(`Invalid message format: missing required fields`);
+          }
+
+          // Validate and convert created_at to Date
+          let createdAt: Date;
+          if (msg.created_at) {
+            createdAt = new Date(msg.created_at);
+            // Check if date conversion was successful
+            if (isNaN(createdAt.getTime())) {
+              throw new Error(`Invalid date format for message ${msg.id}: ${msg.created_at}`);
+            }
+          } else {
+            // Fallback to current date if created_at is missing
+            createdAt = new Date();
+            console.warn(`Message ${msg.id} missing created_at, using current date`);
+          }
+
+          return {
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            createdAt,
+          };
+        });
+        
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Failed to format selected messages:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+        toast.error(`Failed to load chat messages: ${errorMessage}`);
+        
+        // Preserve previous messages state to avoid clearing the chat
+        // Only clear if there were no previous messages
+        if (messages.length === 0) {
+          setMessages([]);
+        }
+      }
     } else if (
       selectedMessages &&
       selectedMessages.length === 0 &&
@@ -153,7 +218,7 @@ export function useChatLogic({
       // Clear messages when starting a new chat
       setMessages([]);
     }
-  }, [selectedMessages, selectedSessionId, setMessages]);
+  }, [selectedMessages, selectedSessionId, setMessages, messages.length]);
 
   const isGeneratingResponse = ["streaming", "submitted"].includes(status);
 

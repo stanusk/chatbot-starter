@@ -90,8 +90,17 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
 
         {/* New Chat entry */}
         <div
+          role="button"
+          tabIndex={0}
           onClick={() => onSessionSelect?.("", [])}
-          className="p-3 rounded-lg cursor-pointer transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onSessionSelect?.("", []);
+            }
+          }}
+          aria-label="Start a new chat conversation"
+          className="p-3 rounded-lg cursor-pointer transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0">
@@ -106,8 +115,22 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
         {sessions.map((session) => (
           <div
             key={session.id}
+            role="button"
+            tabIndex={0}
             onClick={() => handleSessionClick(session)}
-            className={`p-3 rounded-lg cursor-pointer transition-colors ${
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleSessionClick(session);
+              }
+            }}
+            aria-label={`Open chat session: ${
+              session.title && session.title !== "New Chat"
+                ? session.title
+                : "New Chat"
+            }, last updated ${formatDate(session.updated_at)}`}
+            aria-pressed={currentSessionId === session.id}
+            className={`p-3 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
               currentSessionId === session.id
                 ? "bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700"
                 : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700"

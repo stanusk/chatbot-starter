@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { useSupabase } from "./useSupabase";
 
 interface UseAuthReturn {
   user: User | null;
@@ -16,6 +17,7 @@ export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const supabaseHook = useSupabase();
 
   // Set client flag to prevent hydration mismatches
   useEffect(() => {

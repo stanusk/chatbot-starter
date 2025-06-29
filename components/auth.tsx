@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface AuthProps {
-  user: User | null;
   onAuthChange: (user: User | null) => void;
 }
 
-export function Auth({ onAuthChange }: Omit<AuthProps, "user">) {
+export function Auth({ onAuthChange }: AuthProps) {
   const { user, loading, signIn, signOut } = useAuth();
   const [email, setEmail] = useState("");
   const [isClient, setIsClient] = useState(false);

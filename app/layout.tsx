@@ -9,9 +9,9 @@ import { DeployButton } from "@/components/deploy-button";
 import { StarButton } from "@/components/star-button";
 
 export const metadata: Metadata = {
-  title: "Reasoning Preview",
+  title: "Garage Bot",
   description:
-    "This is a preview of using reasoning models with Next.js and the AI SDK.",
+    "Garage Bot is a chatbot that uses reasoning models with Next.js and the AI SDK.",
 };
 
 export default function RootLayout({

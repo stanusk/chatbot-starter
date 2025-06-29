@@ -65,8 +65,14 @@ className = "bg-zinc-100 dark:bg-zinc-800";
 ### Chat-Specific Colors
 
 ```css
+/* Light mode */
 --chat-user: 220 14.3% 95.9%;
 --chat-assistant: 220 14.3% 95.9%;
+--chat-reasoning: 47.9 95.8% 53.1%;
+
+/* Dark mode */
+--chat-user: 220 13% 18%;
+--chat-assistant: 220 13% 18%;
 --chat-reasoning: 47.9 95.8% 53.1%;
 ```
 

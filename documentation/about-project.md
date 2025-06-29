@@ -12,7 +12,7 @@
 
 - **Vercel AI SDK** - Multi-provider AI integration with streaming
 - **Anthropic Claude Sonnet 3.7** - Primary AI model with reasoning capabilities
-- **Additional AI Providers** - OpenAI, Groq, Fireworks, DeepSeek support
+- **Additional AI Providers** - Anthropic, Groq, Fireworks, and DeepSeek support
 - **Reasoning Mode** - Advanced AI thinking with score tracking
 - **Smooth Streaming** - Word-based chunking for natural responses
 

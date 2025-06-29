@@ -101,9 +101,9 @@ export function useSupabase(): UseSupabaseReturn {
     }
   }, []);
 
-  const generateTitle = useCallback((firstMessage: string, maxLength: number = 50): string => {
+  const generateTitle = (firstMessage: string, maxLength: number = 50): string => {
     return generateChatTitle(firstMessage, maxLength);
-  }, []);
+  };
 
   return {
     // Session operations

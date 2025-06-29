@@ -1,7 +1,7 @@
 "use client";
 
 import cn from "classnames";
-import { useChatLogic } from "@/hooks";
+import { useChat } from "@/hooks";
 import { Messages } from "./messages";
 import { Footnote } from "./footnote";
 import { ChatMessage } from "@/lib/supabase";
@@ -33,7 +33,7 @@ export function Chat({
     isGeneratingResponse,
     sendMessage,
     stop,
-  } = useChatLogic({
+  } = useChat({
     selectedSessionId,
     selectedMessages,
     onChatUpdate,

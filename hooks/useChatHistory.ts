@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getChatSessions, getChatMessages } from "@/lib/supabase";
 import type { ChatSession, ChatMessage } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { formatRelativeDate } from "@/lib/date-utils";
+import { useSupabase } from "./useSupabase";
 
 interface UseChatHistoryOptions {
   user: User | null;
@@ -28,6 +28,7 @@ export function useChatHistory({
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const { getSessions, getMessages } = useSupabase();
 
   // Set client flag to prevent hydration mismatches
   useEffect(() => {
@@ -41,7 +42,7 @@ export function useChatHistory({
       setLoading(true);
     }
     try {
-      const userSessions = await getChatSessions(user.id);
+      const userSessions = await getSessions(user.id);
       setSessions(userSessions);
     } catch (error) {
       console.error("Failed to load chat sessions:", error);
@@ -80,7 +81,7 @@ export function useChatHistory({
   const handleSessionClick = useCallback(async (session: ChatSession) => {
     if (onSessionSelect) {
       try {
-        const messages = await getChatMessages(session.id);
+        const messages = await getMessages(session.id);
         onSessionSelect(session.id, messages);
       } catch (error) {
         console.error("Failed to load chat messages:", error);
@@ -91,9 +92,9 @@ export function useChatHistory({
     }
   }, [onSessionSelect]);
 
-  const formatDate = useCallback((dateString: string) => {
+  const formatDate = (dateString: string) => {
     return formatRelativeDate(dateString);
-  }, []);
+  };
 
   return {
     sessions,
