@@ -28,4 +28,21 @@ export interface ApiErrorResponse {
 export interface ApiSuccessResponse<T = unknown> {
   data: T;
   message?: string;
+}
+
+// AI streaming types
+export interface AIStreamResult {
+  text: string;
+  reasoning?: string;
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+  finishReason?: string;
+  experimental_providerMetadata?: {
+    anthropic?: {
+      thinking?: string;
+    };
+  };
 } 
