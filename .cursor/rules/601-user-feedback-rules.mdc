@@ -1,0 +1,61 @@
+---
+description: Rules for providing appropriate user feedback in this chatbot application.
+globs: 
+alwaysApply: false
+---
+# User Feedback Rules
+
+Rules for providing appropriate user feedback in this chatbot application.
+
+## Context
+- When handling loading states during AI responses
+- When displaying errors for authentication or AI failures
+- When providing feedback for chat operations
+
+## Instructions
+
+### Loading States
+- Show typing indicators during AI response streaming
+- Use skeleton loaders for chat history loading
+- Provide immediate feedback for user message submission
+- Handle loading states gracefully during network issues
+
+### Error Handling
+- Use centralized `ErrorHandlers` from `@/lib/error-handling` for all errors
+- Always provide context: `{ component: "ComponentName", action: "actionName" }`
+- Use specific error types: `authError`, `supabaseError`, `aiProviderError`, `validationError`
+- Display clear error messages for AI provider failures
+- Show authentication errors with actionable guidance
+- Handle network errors with retry options
+- Provide fallback responses when AI is unavailable
+
+```typescript
+// Standard pattern for all error handling
+try {
+  await operation();
+} catch (error) {
+  ErrorHandlers.supabaseError("Operation failed", error, {
+    component: "ComponentName",
+    action: "operationName",
+    metadata: { relevantContext: "value" }
+  });
+}
+```
+
+### Success Feedback
+- Avoid success messages for expected chat operations
+- Provide subtle confirmation for settings changes
+- Show progress for longer operations (file uploads, etc.)
+- Use visual cues rather than toast messages when possible
+
+### Chat-Specific Patterns
+- Show message delivery status appropriately
+- Handle streaming interruptions gracefully
+- Provide feedback for unsaved changes
+- Display session creation/switching feedback minimally
+
+### Best Practices
+- Keep error messages user-friendly and actionable
+- Avoid technical jargon in user-facing messages
+- Provide retry mechanisms for transient failures
+- Use progressive disclosure for detailed error information

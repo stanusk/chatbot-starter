@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Never run "npm run dev" or equivalent, since it's always running
+- Never run "npm run build" since it's breaking the running dev build

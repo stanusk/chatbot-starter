@@ -200,3 +200,57 @@ export const UncheckedSquare = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const AlertTriangleIcon = ({
+  size = 16,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) => {
+  return (
+    <svg
+      height={size}
+      width={size}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 16 16"
+      style={{ color: "currentcolor" }}
+      className={className}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M8 6v1.5m0 2.5h.01M2.625 13h10.75c1.03 0 1.668-1.111 1.155-1.667L9.155 2.667c-.513-.556-1.155-.556-1.667 0L2.125 11.333C1.612 11.889 2.25 13 3.28 13z"
+      />
+    </svg>
+  );
+};
+
+export const XIcon = ({
+  size = 16,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) => {
+  return (
+    <svg
+      height={size}
+      width={size}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 16 16"
+      style={{ color: "currentcolor" }}
+      className={className}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M4 12L12 4M4 4l8 8"
+      />
+    </svg>
+  );
+};

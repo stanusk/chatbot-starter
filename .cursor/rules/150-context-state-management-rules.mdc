@@ -1,0 +1,118 @@
+---
+description: Rules for using the centralized React Context state management system established in this chatbot project.
+globs: 
+alwaysApply: false
+---
+# Context State Management Rules
+
+Rules for using the centralized React Context state management system established in this chatbot project.
+
+## Context Usage Patterns
+
+<critical>
+- ALWAYS use context hooks instead of individual state hooks for shared state
+- Use `useAuthContext()` instead of `useAuth()` hook for authentication
+- Use `useChatContext()` for chat session state and sidebar UI state
+- Use `useUIContext()` for global loading and error states
+- Import from `@/contexts` barrel export: `import { useAuthContext, useChatContext } from "@/contexts"`
+</critical>
+
+### Context Responsibility Boundaries
+
+**AuthContext**: User authentication and session management only
+- User state, loading states, sign-in/sign-out operations
+- Provides `isClient` for hydration safety across the app
+- Do NOT add chat-related state here
+
+**ChatContext**: Chat sessions, messages, and chat-related UI state
+- Selected session/messages, sidebar open/close, chat updates
+- Chat history ref for external operations
+- Do NOT add global loading states here
+
+**UIContext**: Global application UI state only
+- Global loading states with messages, global error states
+- Do NOT add feature-specific UI state here
+
+## Provider Setup Requirements
+
+<critical>
+- Provider nesting order MUST be: ErrorBoundary → UI → Auth → Chat
+- Use `AppProvider` component for consistent setup
+- Never nest providers in different order - Auth depends on UI, Chat depends on Auth
+</critical>
+
+```tsx
+// Correct setup (already done in app/layout.tsx)
+<AppProvider>
+  {children}
+</AppProvider>
+
+// AppProvider structure:
+<ErrorBoundary>
+  <UIProvider>
+    <AuthProvider>
+      <ChatProvider>
+        {children}
+      </ChatProvider>
+    </AuthProvider>
+  </UIProvider>
+</ErrorBoundary>
+```
+
+## Hydration Safety Pattern
+
+All contexts use the `isClient` pattern to prevent hydration mismatches:
+
+```tsx
+// Use isClient from AuthContext for hydration safety
+const { user, isClient } = useAuthContext();
+
+if (!isClient) {
+  return <LoadingComponent />; // or null
+}
+```
+
+## Migration from Props
+
+<critical>
+- Do NOT pass auth state as props - use `useAuthContext()` directly in components
+- Do NOT pass chat session state as props - use `useChatContext()` directly
+- Remove `onAuthChange` props and similar callback props when migrating to contexts
+</critical>
+
+### Before (Prop Drilling)
+```tsx
+function Parent({ user, onAuthChange }) {
+  return <Child user={user} onAuthChange={onAuthChange} />;
+}
+```
+
+### After (Context)
+```tsx
+function Parent() {
+  return <Child />; // No props needed
+}
+
+function Child() {
+  const { user } = useAuthContext(); // Direct access
+  return <div>Hello {user?.email}</div>;
+}
+```
+
+## Error Handling Integration
+
+- Global errors use `useUIContext().setGlobalError()`
+- Context errors are caught by ErrorBoundary wrapper
+- Always provide user-friendly error messages, not technical details
+
+## Performance Considerations
+
+- All context functions are memoized with `useCallback`
+- Only subscribe to contexts you actually use in a component
+- Context values are optimized to prevent unnecessary re-renders
+
+## Type Safety Requirements
+
+- Import context types from `@/types/contexts`
+- Use `import type` for type-only imports
+- All context interfaces are centrally defined and exported

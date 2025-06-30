@@ -1,0 +1,144 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Task Planning & Agent Orchestration Rules
+
+Rules for planning agents when breaking down PRDs into implementation tasks and for implementation agents when working within orchestrated task structures.
+
+## Context
+- When acting as a planning agent breaking down features into tasks
+- When acting as an implementation agent working from task documentation  
+- When creating or updating task documentation and active context files
+- When planning new chat features or AI integrations
+- When working on database schema or API changes
+
+## Instructions
+
+### Core Planning Philosophy
+
+<critical>
+- Break down by FUNCTIONAL SLICES, not architectural layers
+- Every phase must deliver TESTABLE functionality
+- Avoid "foundation-only" phases that can't be validated in isolation
+- User should be able to interact with and verify progress at each checkpoint
+</critical>
+
+**❌ Avoid Layer-Based Breakdown:**
+- Phase 1: Define all types
+- Phase 2: Implement all logic  
+- Phase 3: Build all UI
+- Phase 4: Connect everything
+
+**✅ Use Functional Slice Breakdown:**
+- Phase 1: Minimal working end-to-end flow
+- Phase 2: Add error handling and edge cases
+- Phase 3: Add advanced features and optimization
+- Phase 4: Polish and finalize
+
+### Task Complexity Classification
+
+<critical>
+- ALWAYS classify features by RISK and DEPENDENCY, not just size
+- A small feature introducing new patterns needs more checkpoints than a large feature following established patterns
+</critical>
+
+**Simple Extension**: Following established patterns, low architectural risk
+- Slice Strategy: Basic Working Flow → Complete (1 phase)
+- Examples: Adding UI components, extending existing forms, simple API endpoints
+- Each phase delivers working functionality user can test
+
+**Complex Feature**: New functionality with multiple services/components, higher risk  
+- Slice Strategy: Core Flow → Error Handling → Advanced Features (3 phases)
+- Examples: New AI providers, authentication changes, real-time features
+- Phase 1: Get basic happy path working end-to-end
+- Phase 2: Add error handling, fallbacks, edge cases
+- Phase 3: Add advanced features, optimization, polish
+
+**Architectural Feature**: New patterns or significant system changes
+- Slice Strategy: Minimal Integration → Core Logic → Advanced Features → Complete (4 phases)
+- Examples: Database schema changes, AI streaming modifications, auth system updates
+- Phase 1: Minimal working integration to prove concept
+- Phase 2: Implement core business logic with basic error handling
+- Phase 3: Add advanced features and optimizations
+- Phase 4: Finalize with comprehensive error handling and polish
+
+### Functional Slice Requirements
+
+**Each Phase Must Include**:
+- Working end-to-end functionality (however minimal)
+- Clear way for user to test and validate progress
+- Specific success criteria that can be manually verified
+- Building upon the previous phase's working functionality
+
+**Phase Scope Guidelines**:
+- Start with simplest possible working version
+- Add complexity incrementally in subsequent phases
+- Ensure each phase adds measurably testable value
+
+### Task Documentation Requirements
+
+**Research Guidance Must Include**:
+- Specific files to research with focus areas
+- Exact patterns to follow (reference by file path)  
+- Applicable cursor rules (reference by name, don't reproduce content)
+- Expected testable outcome for the research phase
+
+**Implementation Scope Must Define**:
+- Clear boundaries of what should be implemented in this phase
+- Specific working functionality that will be deliverable
+- How the user can test and validate the phase completion
+- Self-validation criteria before checkpoints
+
+**Avoid Micromanagement**:
+- Don't specify exact method names or signatures
+- Don't prescribe specific implementation details
+
+### Checkpoint Validation
+
+**Each checkpoint should result in**:
+- Working functionality the user can interact with
+- Clear instructions on how to test what was implemented
+- Evidence that the approach is sound before proceeding to next phase
+
+## Examples
+
+<example>
+// Good functional slice specification
+**Phase 1: Basic AI Provider Integration**
+**Research**: Current AI streaming pattern (app/api/chat/route.ts), focus on provider initialization and basic request/response flow
+**Must Follow**: api-data-flow-rules, user-feedback-rules
+**Deliverable**: User can send a message and get a response from new provider (no streaming yet)
+**Test Criteria**: Type a message, press send, see response appear in chat
+</example>
+
+<example>
+**Phase 2: Add Streaming Support**  
+**Build on**: Working basic responses from Phase 1
+**Deliverable**: Messages stream in real-time character by character
+**Test Criteria**: Send message, watch response appear progressively, no errors in console
+</example>
+
+<example type="invalid">
+// Bad - layer-based approach
+**Phase 1: Define AI Provider Types**
+**Deliverable**: TypeScript interfaces and types for new provider
+// User can't test this - just type definitions
+</example>
+
+<example>
+// Good active context update
+**Phase 1 Completed**: Basic Claude integration working
+**User Can Test**: Send message "Hello" in chat, receives streamed response from Claude
+**Key Files Modified**: app/api/chat/route.ts (lines 45-67), lib/models.ts (lines 12-15)  
+**Testing Notes**: Tested with various message lengths, streaming works consistently
+**Next Phase**: Add error handling for API failures and rate limiting
+</example>
+
+<example type="invalid">
+// Bad - not testable outcome
+**Phase 1 Completed**: Set up provider configuration
+**Next Phase**: Implement request logic
+// User has no way to validate if setup is correct
+</example>

@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Refactoring Rules
+
+Rules for refactoring React components, hooks, and maintaining codebase maintainability.
+
+## Context
+- When modifying existing React components or custom hooks
+- When refactoring large components into smaller ones
+- When organizing component hierarchy and data flow
+
+## Instructions
+
+<critical>
+- ALWAYS start with a plan that accounts for all functionality and create a checklist
+- Keep track of which functionality goes to which file
+- Ensure no original functionality is lost during refactoring
+- After each major step, note what remains to maintain tracking
+</critical>
+
+- Ensure each component maintains single responsibility
+- Extract reusable stateful logic into custom hooks
+- Extract pure functions to utility files unless highly component-specific
+- Extract UI patterns that appear multiple times into shared components
+
+### Component Extraction
+- When extracting components, ensure all props and state are properly moved
+- Remove unused imports and dependencies from parent component
+- Maintain proper prop drilling or consider context for deeply nested data
+
+### Server vs Client Components
+- When refactoring, clearly separate server-side and client-side logic
+- Move client-side interactivity to Client Components only when needed
+- Keep data fetching in Server Components when possible
+
+### Hook Extraction
+- Extract complex state management logic to custom hooks
+- Ensure hook dependencies are properly managed
+- Test hook behavior independently when possible
+
+- Always update comments and documentation after refactoring

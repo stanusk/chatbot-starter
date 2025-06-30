@@ -1,37 +1,18 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import { toast } from "sonner";
-
-interface InputProps {
-  input: string;
-  setInput: (value: string) => void;
-  selectedModelId: string;
-  isGeneratingResponse: boolean;
-  isReasoningEnabled: boolean;
-}
+import { ErrorHandlers } from "@/lib/error-handling";
+import { Textarea } from "@/components/ui/textarea";
+import type { InputProps } from "@/types/components";
 
 export function Input({
   input,
   setInput,
-  selectedModelId,
   isGeneratingResponse,
-  isReasoningEnabled,
+  onSubmit,
 }: InputProps) {
-  const { append } = useChat({
-    id: "primary",
-    body: {
-      selectedModelId,
-      isReasoningEnabled,
-    },
-    onError: () => {
-      toast.error("An error occurred, please try again!");
-    },
-  });
-
   return (
-    <textarea
-      className="mb-12 resize-none w-full min-h-12 outline-none bg-transparent placeholder:text-zinc-400"
+    <Textarea
+      className="resize-none w-full min-h-16 pr-20 pl-28 pb-12 pt-4 border-0 bg-transparent focus-visible:ring-0"
       placeholder="Send a message"
       value={input}
       autoFocus
@@ -47,18 +28,18 @@ export function Input({
           }
 
           if (isGeneratingResponse) {
-            toast.error("Please wait for the model to finish its response!");
-
+            ErrorHandlers.validationError(
+              "Cannot send message while generating response",
+              "Please wait for the model to finish its response!",
+              {
+                component: "Input",
+                action: "handleKeyPress",
+              }
+            );
             return;
           }
 
-          append({
-            role: "user",
-            content: input,
-            createdAt: new Date(),
-          });
-
-          setInput("");
+          onSubmit();
         }
       }}
     />

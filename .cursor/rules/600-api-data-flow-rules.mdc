@@ -1,0 +1,56 @@
+---
+description: Rules for handling API calls, AI streaming, and data persistence in this chatbot project.
+globs: 
+alwaysApply: false
+---
+# API & Data Flow Rules
+
+Rules for handling API calls, AI streaming, and data persistence in this chatbot project.
+
+## Context
+- When working with Vercel AI SDK streaming responses
+- When handling Supabase database operations
+- When managing chat session and message state
+
+## Instructions
+
+### AI Streaming Pattern
+- Use Vercel AI SDK's `streamText` for AI responses
+- Handle streaming in API routes (`app/api/chat/route.ts`)
+- Save messages during streaming, not just at completion
+- Implement proper error handling for AI provider failures
+
+### Database Operations
+- Use Supabase client for all database operations
+- Follow Row Level Security patterns for user data isolation
+- Batch related operations when possible
+- Handle real-time subscriptions properly
+
+### Data Flow Architecture
+```
+User Input → API Route → AI Provider → Stream Response → Save to DB → Update UI
+```
+
+### Error Handling
+- Handle AI provider failures gracefully with fallbacks
+- Use proper error boundaries for streaming errors
+- Provide user feedback for connection/AI failures
+- Log errors appropriately without exposing sensitive data
+
+### State Management Principles
+- **Single Source of Truth**: Use one variable for each piece of state (avoid: selectedSessionId, sessionId, sessionIdRef, currentSessionId for same data)
+- **Prefer null over magic strings**: Use `null` for "new chat" state instead of `"__NEW_CHAT__"`
+- **Avoid complex state synchronization**: Don't sync state between multiple useState, useRef, and computed values
+- **Let parent components own session state**: Child components should receive session ID as props, not manage it internally
+
+### State Management
+- Use React state for UI-specific data
+- Use Supabase real-time for persistent chat data
+- Avoid unnecessary re-renders during streaming
+- Keep chat history in sync across sessions
+
+### Session Management
+- Auto-create sessions on first message
+- Generate session titles from first user message
+- Handle session persistence across browser refreshes
+- Clean up abandoned sessions appropriately
