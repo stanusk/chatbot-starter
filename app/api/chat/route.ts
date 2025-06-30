@@ -36,12 +36,17 @@ export async function POST(request: NextRequest) {
     ],
     messages,
     onFinish: async (result) => {
+      // Get the last user message for title generation
+      const lastUserMessage = messages[messages.length - 1];
+      const userMessageContent = lastUserMessage?.role === "user" ? lastUserMessage.content : undefined;
+      
       // Handle assistant message persistence
       await handleAssistantMessagePersistence(
         currentSessionId,
         result,
         selectedModelId,
-        isReasoningEnabled
+        isReasoningEnabled,
+        userMessageContent
       );
     },
   });

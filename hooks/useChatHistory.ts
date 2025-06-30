@@ -6,6 +6,7 @@ import { ErrorHandlers } from "@/lib/error-handling";
 import { formatRelativeDate } from "@/utils";
 import { useSupabase } from "./useSupabase";
 import { useAuthContext } from "@/contexts";
+import { useAutoRefreshTimestamps } from "./useAutoRefreshTimestamps";
 import type { UseChatHistoryOptions, UseChatHistoryReturn } from "@/types/hooks";
 
 export function useChatHistory({
@@ -15,6 +16,9 @@ export function useChatHistory({
   const [loading, setLoading] = useState(false);
   const { getSessions, getMessages } = useSupabase();
   const { user, isClient } = useAuthContext();
+  
+  // Auto-refresh timestamps every minute
+  const refreshKey = useAutoRefreshTimestamps();
 
   const loadSessions = useCallback(async (showLoading = true) => {
     if (!isClient || !user) return;
@@ -75,9 +79,11 @@ export function useChatHistory({
     }
   }, [onSessionSelect]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _ = refreshKey; // Force re-render when refreshKey changes
     return formatRelativeDate(dateString);
-  };
+  }, [refreshKey]);
 
   return {
     sessions,

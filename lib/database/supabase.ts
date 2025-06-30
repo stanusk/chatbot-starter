@@ -152,6 +152,28 @@ export async function updateChatSessionTitle(
   if (error) throw error;
 }
 
+export async function getChatSession(sessionId: string): Promise<ChatSession | null> {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized");
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("chat_sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No rows returned
+      return null;
+    }
+    throw error;
+  }
+
+  return data;
+}
+
 // Generate a chat title from the first user message
 export function generateChatTitle(firstMessage: string, maxLength: number = 50): string {
   // Clean and truncate the message for a title
