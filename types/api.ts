@@ -4,7 +4,7 @@
 
 import { Message } from "ai";
 
-// Chat API types - using legacy modelID type for backward compatibility
+// Chat API types
 export interface ChatRequestBody {
   messages: Array<Message>;
   selectedModelId: string; // Using string to match current API implementation

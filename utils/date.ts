@@ -1,17 +1,20 @@
 /**
  * Formats a date string into a human-readable relative time format
  * @param dateString ISO date string to format
- * @param timezone Optional timezone for date conversion
  * @returns Formatted relative time string (e.g., "Just now", "2h ago", "3d ago")
+ * 
+ * Note: Timezone support has been temporarily removed due to unreliable conversion.
+ * For proper timezone handling, consider using a dedicated library like date-fns-tz.
  */
-export function formatRelativeDate(dateString: string, timezone?: string): string {
+export function formatRelativeDate(dateString: string): string {
   if (!dateString) {
     return "Unknown";
   }
   
-  const date = timezone ? 
-    new Date(new Date(dateString).toLocaleString("en-US", { timeZone: timezone })) :
-    new Date(dateString);
+  // Parse the date string directly - if it's already in ISO format, this is reliable
+  // For timezone support, we'd need a proper library like date-fns-tz
+  // For now, we'll use the original date without timezone conversion to avoid unreliable parsing
+  const date = new Date(dateString);
   
   // Handle invalid dates
   if (isNaN(date.getTime())) {

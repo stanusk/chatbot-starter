@@ -16,6 +16,3 @@ export const DEFAULT_MODEL_SETTINGS = {
 // Re-export types for convenience
 export type { ModelID, ModelDisplayNames } from "@/types/models";
 export { SONNET_3_7_MODEL_ID } from "@/types/models";
-
-// Legacy export for backward compatibility
-export type modelID = ModelID; 
