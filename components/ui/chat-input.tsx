@@ -8,7 +8,7 @@ import { ModelSelector } from "@/components/ui/model-selector";
 import { ReasoningToggle } from "@/components/ui/reasoning-toggle";
 import { ArrowUpIcon, StopIcon } from "@/components/icons";
 import { SONNET_3_7_MODEL_ID } from "@/lib/models";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import type { ChatInputProps } from "@/types/ui";
 
 export function ChatInput({

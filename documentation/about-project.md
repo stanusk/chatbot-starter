@@ -27,23 +27,29 @@
 - **Next.js 15 App Router** with React Server Components
 - **shadcn/ui** - Component library with Radix UI primitives
 
-## 📁 Project-Specific Organization
+## 📁 Project Structure
 
 ```
 ├── app/api/chat/route.ts      # AI streaming endpoint with session management
 ├── components/
-│   ├── auth.tsx               # Magic link authentication
-│   ├── chat.tsx               # Main chat with model selection
-│   ├── chat-history.tsx       # Session management sidebar
-│   └── ui/                    # shadcn/ui components
+│   ├── features/              # Feature-specific components
+│   │   ├── auth/              # Authentication components
+│   │   └── chat/              # Chat, messages, history, etc.
+│   ├── ui/                    # Reusable UI components (shadcn/ui)
+│   └── layout/                # Layout components (sidebar, header, etc.)
 ├── hooks/
 │   ├── useAuth.ts             # Supabase auth integration
 │   ├── useChat.ts             # AI SDK chat state
 │   └── useChatHistory.ts      # Session history management
 ├── lib/
-│   ├── supabase.ts            # Chat session & message persistence
+│   ├── database/              # Database utilities (Supabase client, operations)
+│   ├── api/                   # API handlers (chat, error responses)
 │   ├── models.ts              # AI provider configuration
-│   └── date-utils.ts          # Chat timestamp formatting
+│   └── error-handling.ts      # Centralized error management
+├── utils/                     # Pure utility functions (date formatting, etc.)
+├── constants/                 # App constants (model configs, etc.)
+├── contexts/                  # React contexts (auth, chat, UI state)
+├── types/                     # TypeScript type definitions
 └── supabase/migrations/       # Database schema for chat data
 ```
 
@@ -87,11 +93,19 @@
 - **User isolation** via Supabase RLS
 - **Reasoning text separation** from main content
 
-## 🔍 Project-Specific Patterns
+## 🔍 Key Development Patterns
+
+### Directory Organization
+
+- **`components/features/`** - Domain-specific components (auth, chat)
+- **`components/ui/`** - Reusable UI primitives with consistent styling
+- **`lib/database/`** - All Supabase operations and database utilities
+- **`utils/`** - Pure functions without external dependencies
+- **`constants/`** - Configuration values and model definitions
 
 ### AI Provider Setup
 
-- Custom provider wrapper with reasoning middleware
+- Custom provider wrapper with reasoning middleware (`lib/models.ts`)
 - Model-specific settings (thinking budget, tag extraction)
 - Fallback handling for unavailable providers
 

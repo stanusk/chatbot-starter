@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useChat as useAISDKChat } from "@ai-sdk/react";
 import { UIMessage } from "ai";
 import { ErrorHandlers } from "@/lib/error-handling";
-import { ChatMessage } from "@/lib/supabase";
+import { ChatMessage } from "@/lib/database";
 import { modelID } from "@/lib/models";
 import type { ModelID } from "@/types/models";
 import { useAuthContext } from "@/contexts";

@@ -8,8 +8,8 @@ import {
   getChatSessions,
   updateChatSessionTitle,
   generateChatTitle,
-} from "@/lib/supabase";
-import type { ChatSession, ChatMessage } from "@/lib/supabase";
+} from "@/lib/database";
+import type { ChatSession, ChatMessage } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 import type { UseSupabaseReturn } from "@/types/hooks";
 

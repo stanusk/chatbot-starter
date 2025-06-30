@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 
 interface AuthContextType {

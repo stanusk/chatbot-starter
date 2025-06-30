@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { ChatSession, ChatMessage } from "@/lib/supabase";
+import type { ChatSession, ChatMessage } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
-import { formatRelativeDate } from "@/lib/date-utils";
+import { formatRelativeDate } from "@/utils";
 import { useSupabase } from "./useSupabase";
 import { useAuthContext } from "@/contexts";
 import type { UseChatHistoryOptions, UseChatHistoryReturn } from "@/types/hooks";

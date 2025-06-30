@@ -7,7 +7,8 @@ import {
   wrapLanguageModel,
   defaultSettingsMiddleware,
 } from "ai";
-import { SONNET_3_7_MODEL_ID, type ModelID } from "@/types/models";
+import { SONNET_3_7_MODEL_ID } from "@/types/models";
+import { DEFAULT_MODEL_SETTINGS } from "@/constants";
 
 // custom provider with different model settings:
 export const myProvider = customProvider({
@@ -17,7 +18,7 @@ export const myProvider = customProvider({
         settings: {
           providerMetadata: {
             anthropic: {
-              thinking: { type: "enabled", budgetTokens: 5000 },
+              thinking: { type: "enabled", budgetTokens: DEFAULT_MODEL_SETTINGS.THINKING_BUDGET_TOKENS },
             },
           },
         },
@@ -26,28 +27,19 @@ export const myProvider = customProvider({
     }),
     "deepseek-r1": wrapLanguageModel({
       middleware: extractReasoningMiddleware({
-        tagName: "think",
+        tagName: DEFAULT_MODEL_SETTINGS.REASONING_TAG_NAME,
       }),
       model: fireworks("accounts/fireworks/models/deepseek-r1"),
     }),
     "deepseek-r1-distill-llama-70b": wrapLanguageModel({
       middleware: extractReasoningMiddleware({
-        tagName: "think",
+        tagName: DEFAULT_MODEL_SETTINGS.REASONING_TAG_NAME,
       }),
       model: groq("deepseek-r1-distill-llama-70b"),
     }),
   },
 });
 
-// Re-export types from centralized types for backward compatibility
-export type { ModelID, ModelDisplayNames } from "@/types/models";
-export { SONNET_3_7_MODEL_ID } from "@/types/models";
-
-// Legacy export for backward compatibility
-export type modelID = ModelID;
-
-export const models: Record<ModelID, string> = {
-  [SONNET_3_7_MODEL_ID]: "Claude Sonnet 3.7",
-  "deepseek-r1": "DeepSeek-R1",
-  "deepseek-r1-distill-llama-70b": "DeepSeek-R1 Llama 70B",
-};
+// Re-export types and constants from centralized locations for backward compatibility
+export type { ModelID, ModelDisplayNames, modelID } from "@/constants";
+export { SONNET_3_7_MODEL_ID, models } from "@/constants";

@@ -2,10 +2,14 @@
 
 import cn from "classnames";
 import Markdown from "react-markdown";
-import { markdownComponents } from "./markdown-components";
+import { markdownComponents } from "@/components/markdown-components";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon, SpinnerIcon } from "./icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  SpinnerIcon,
+} from "@/components/icons";
 import type {
   ReasoningMessagePartProps,
   TextMessagePartProps,

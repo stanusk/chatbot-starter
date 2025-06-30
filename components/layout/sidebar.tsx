@@ -1,7 +1,6 @@
 import { forwardRef } from "react";
-import { Auth } from "@/components/auth";
-import { ChatHistory } from "@/components/chat-history";
-import { cn } from "@/lib/utils";
+import { Auth, ChatHistory } from "@/components/features";
+import { cn } from "@/utils";
 import type { SidebarProps, ChatHistoryRef } from "@/types/components";
 
 const getSidebarClasses = (isOpen: boolean) => {

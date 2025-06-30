@@ -4,7 +4,7 @@
  */
 
 import { Message } from "ai";
-import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages } from "@/lib/supabase";
+import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages } from "@/lib/database";
 import type { AIStreamResult } from "@/types/api";
 import { ErrorHandlers } from "@/lib/error-handling";
 

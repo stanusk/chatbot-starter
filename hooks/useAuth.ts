@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/database";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useSupabase } from "./useSupabase";

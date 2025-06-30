@@ -7,8 +7,8 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { ChatMessage } from "@/lib/supabase";
-import { ChatHistoryRef } from "@/components/chat-history";
+import { ChatMessage } from "@/lib/database";
+import { ChatHistoryRef } from "@/components/features";
 
 interface ChatContextType {
   // Session state

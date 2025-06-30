@@ -3,7 +3,7 @@
 import cn from "classnames";
 import { useChat } from "@/hooks";
 import { Messages } from "./messages";
-import { Footnote } from "./footnote";
+import { Footnote } from "@/components/footnote";
 import { ChatInput } from "@/components/ui";
 import type { ChatProps } from "@/types/components";
 
