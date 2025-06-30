@@ -100,11 +100,11 @@ export async function saveChatMessage(
 export async function getChatMessages(
   sessionId: string
 ): Promise<ChatMessage[]> {
-  if (!supabase) {
-    throw new Error("Supabase client not initialized");
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized");
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("chat_messages")
     .select("*")
     .eq("session_id", sessionId)
@@ -115,11 +115,11 @@ export async function getChatMessages(
 }
 
 export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
-  if (!supabase) {
-    throw new Error("Supabase client not initialized");
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized");
   }
 
-  let query = supabase
+  let query = supabaseAdmin
     .from("chat_sessions")
     .select("*")
     .order("updated_at", { ascending: false });

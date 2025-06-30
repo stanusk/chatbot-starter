@@ -32,8 +32,7 @@
 
 - **Supabase Integration** - Full authentication and database persistence
 - Magic link authentication (passwordless login)
-- Secure user session management with proper error handling
-- Chat history saved and organized by sessions
+- Chat history saved and organized by sessions with AI-generated titles
 - Row Level Security (RLS) for data protection
 - Graceful fallback when Supabase is unavailable
 

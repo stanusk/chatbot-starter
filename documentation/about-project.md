@@ -83,7 +83,7 @@
 - **Session persistence** across browser sessions
 - **Magic link authentication** (passwordless)
 - **Real-time message streaming**
-- **Chat history sidebar** with session management
+- **Chat history sidebar** with AI-generated session titles
 - **Mobile-responsive** chat interface
 
 ### Data Handling
