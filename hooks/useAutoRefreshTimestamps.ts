@@ -3,11 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 
 /**
- * Hook for automatically refreshing timestamps to keep relative time displays current
- * Uses industry best practices for update intervals:
- * - Every 60 seconds for times less than 1 hour
- * - Every 60 minutes for times less than 1 day  
- * - Every 24 hours for older times
+ * Hook for automatically refreshing timestamps to keep relative time displays current.
+ * Updates every 60 seconds to keep relative time displays current.
+ * Synchronized to minute boundaries for consistent updates across components.
  */
 export function useAutoRefreshTimestamps() {
   const [refreshKey, setRefreshKey] = useState(0);

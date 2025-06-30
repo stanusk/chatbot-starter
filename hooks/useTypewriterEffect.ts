@@ -26,10 +26,13 @@ export function useTypewriterEffect({
     setDisplayText("");
     setIsComplete(false);
 
-    const startTimeout = setTimeout(() => {
+    let startTimeout: NodeJS.Timeout;
+    let typeTimer: NodeJS.Timeout;
+
+    startTimeout = setTimeout(() => {
       let index = 0;
       
-      const typeTimer = setInterval(() => {
+      typeTimer = setInterval(() => {
         setDisplayText(text.slice(0, index + 1));
         index++;
         
@@ -38,11 +41,14 @@ export function useTypewriterEffect({
           setIsComplete(true);
         }
       }, speed);
-
-      return () => clearInterval(typeTimer);
     }, delay);
 
-    return () => clearTimeout(startTimeout);
+    return () => {
+      clearTimeout(startTimeout);
+      if (typeTimer) {
+        clearInterval(typeTimer);
+      }
+    };
   }, [text, speed, delay]);
 
   return { displayText, isComplete };

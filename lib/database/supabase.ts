@@ -87,10 +87,12 @@ export async function saveChatMessage(
   if (error) throw error;
 
   // Update the session's updated_at timestamp
-  await supabaseAdmin
+  const { error: updateError } = await supabaseAdmin
     .from("chat_sessions")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", sessionId);
+
+  if (updateError) throw updateError;
 
   return data;
 }
@@ -123,10 +125,10 @@ export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
     .order("updated_at", { ascending: false });
 
   if (userId) {
-    // Get sessions for this user OR sessions with null user_id (anonymous sessions)
-    query = query.or(`user_id.eq.${userId},user_id.is.null`);
+    // Get sessions only for this specific user
+    query = query.eq("user_id", userId);
   } else {
-    // If no userId provided, only get sessions with null user_id
+    // If no userId provided, only get sessions with null user_id (anonymous sessions)
     query = query.is("user_id", null);
   }
 
@@ -164,7 +166,7 @@ export async function getChatSession(sessionId: string): Promise<ChatSession | n
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === 'PGRST116' || error.message?.includes('No rows')) {
       // No rows returned
       return null;
     }
