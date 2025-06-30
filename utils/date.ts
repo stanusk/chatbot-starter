@@ -22,19 +22,24 @@ export function formatRelativeDate(dateString: string): string {
   }
   
   const now = new Date();
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = diffInMs / (1000 * 60);
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+  const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
   
   // Handle future dates
-  if (diffInHours < 0) {
+  if (diffInMs < 0) {
     return "In the future";
   }
 
-  if (diffInHours < 1) {
+  if (diffInMinutes < 1) {
     return "Just now";
+  } else if (diffInMinutes < 60) {
+    return `${Math.floor(diffInMinutes)}m ago`;
   } else if (diffInHours < 24) {
     return `${Math.floor(diffInHours)}h ago`;
-  } else if (diffInHours < 24 * 7) {
-    return `${Math.floor(diffInHours / 24)}d ago`;
+  } else if (diffInDays < 7) {
+    return `${Math.floor(diffInDays)}d ago`;
   } else {
     return date.toLocaleDateString(undefined, { 
       year: 'numeric', 
