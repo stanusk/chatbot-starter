@@ -12,25 +12,26 @@ import { ErrorHandlers } from "@/lib/error-handling";
  * Session management logic
  */
 export async function handleSessionManagement(sessionId: string | undefined, userId: string | undefined): Promise<string | null> {
-  // Use the provided session ID - don't create new ones
-  let currentSessionId = sessionId;
+  // If session ID provided, use it
+  if (sessionId) {
+    return sessionId;
+  }
   
-  if (!currentSessionId && userId) {
+  // Only create new session if we have a user
+  if (userId) {
     try {
       const session = await createChatSession(userId, "New Chat");
-      currentSessionId = session.id;
+      return session.id;
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to create chat session", error, {
         userId,
         component: "handleSessionManagement",
         action: "createChatSession"
       });
-      // Continue without session persistence if Supabase fails
-      return null;
     }
   }
   
-  return currentSessionId || null;
+  return null;
 }
 
 /**
@@ -46,6 +47,11 @@ export async function handleUserMessagePersistence(
   if (!userMessage || userMessage.role !== "user") return;
 
   try {
+    // Get existing messages to check if this is the first user message
+    const existingMessages = await getChatMessages(sessionId);
+    const isFirstUserMessage = !existingMessages.some(msg => msg.role === "user");
+
+    // Save the user message
     await saveChatMessage(
       sessionId,
       "user",
@@ -55,12 +61,8 @@ export async function handleUserMessagePersistence(
       { timestamp: userMessage.createdAt }
     );
 
-    // Check if this is the first user message and update title
-    const existingMessages = await getChatMessages(sessionId);
-    const userMessages = existingMessages.filter(msg => msg.role === "user");
-    
-    if (userMessages.length === 1) {
-      // This is the first user message, generate and update title
+    // Generate title if this is the first user message
+    if (isFirstUserMessage) {
       await handleTitleGeneration(sessionId, userMessage.content);
     }
   } catch (error) {

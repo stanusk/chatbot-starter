@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "lucide-react";
-import { models, modelID } from "@/lib/models";
+import { models, ModelID } from "@/lib/models";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +20,7 @@ export function ModelSelector({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 px-2">
           <span className="text-muted-foreground">
-            {models[selectedModelId as modelID]}
+            {models[selectedModelId]}
           </span>
           <ChevronDownIcon className="h-4 w-4 ml-1" />
         </Button>
@@ -29,7 +29,7 @@ export function ModelSelector({
         {Object.entries(models).map(([id, name]) => (
           <DropdownMenuItem
             key={id}
-            onClick={() => onModelChange(id)}
+            onClick={() => onModelChange(id as ModelID)}
             className={selectedModelId === id ? "bg-accent" : ""}
           >
             {name}

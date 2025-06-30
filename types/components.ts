@@ -16,7 +16,7 @@ export interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
-  onSessionSelect: (sessionId: string, messages: ChatMessage[]) => void;
+  onSessionSelect: (sessionId: string | null, messages: ChatMessage[]) => void;
   currentSessionId: string | null;
 }
 
@@ -26,6 +26,7 @@ export interface MainContentProps {
   onNewSession: () => void;
   onChatUpdate: () => void;
   onMenuClick: () => void;
+  onSessionCreated?: (sessionId: string) => void;
 }
 
 // Chat component types
@@ -34,6 +35,7 @@ export interface ChatProps {
   selectedMessages?: ChatMessage[];
   onNewSession?: () => void;
   onChatUpdate?: () => void;
+  onSessionCreated?: (sessionId: string) => void;
 }
 
 export interface MessagesProps {
@@ -62,7 +64,7 @@ export interface TextMessagePartProps {
 // Chat history types
 export interface ChatHistoryProps {
   user: User | null;
-  onSessionSelect?: (sessionId: string, messages: ChatMessage[]) => void;
+  onSessionSelect?: (sessionId: string | null, messages: ChatMessage[]) => void;
   currentSessionId?: string | null;
 }
 

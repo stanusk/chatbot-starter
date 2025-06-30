@@ -19,11 +19,12 @@ interface ChatContextType {
   sidebarOpen: boolean;
 
   // Actions
-  selectSession: (sessionId: string, messages: ChatMessage[]) => void;
+  selectSession: (sessionId: string | null, messages: ChatMessage[]) => void;
   startNewChat: () => void;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
   handleChatUpdate: () => void;
+  handleSessionCreated: (sessionId: string) => void;
 
   // Chat history ref for external operations
   chatHistoryRef: React.RefObject<ChatHistoryRef | null>;
@@ -43,8 +44,6 @@ interface ChatProviderProps {
   children: React.ReactNode;
 }
 
-const NEW_CHAT_ID = "__NEW_CHAT__";
-
 export function ChatProvider({ children }: ChatProviderProps) {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null
@@ -54,15 +53,17 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
 
   const startNewChat = useCallback(() => {
-    // Start a new chat - let the API create the session when first message is sent
+    // Start a new chat - clear session and messages
     setSelectedSessionId(null);
     setSelectedMessages([]);
   }, []);
 
   const selectSession = useCallback(
-    (sessionId: string, messages: ChatMessage[]) => {
-      setSelectedSessionId(sessionId === NEW_CHAT_ID ? null : sessionId);
-      setSelectedMessages(sessionId === NEW_CHAT_ID ? [] : messages);
+    (sessionId: string | null, messages: ChatMessage[]) => {
+      // Set the session ID (null for new chat, string for existing session)
+      setSelectedSessionId(sessionId);
+      setSelectedMessages(messages);
+
       // Close sidebar on mobile when a session is selected
       setSidebarOpenState(false);
     },
@@ -84,6 +85,21 @@ export function ChatProvider({ children }: ChatProviderProps) {
     }
   }, []);
 
+  const handleSessionCreated = useCallback((sessionId: string) => {
+    // When a new session is created during a NEW_CHAT flow:
+    // 1. Update selectedSessionId to the real session ID so UI shows it as selected
+    // 2. Keep selectedMessages empty since messages are handled by AI SDK
+    // 3. Refresh the sidebar to show the new session
+
+    setSelectedSessionId(sessionId);
+    setSelectedMessages([]); // Keep empty since AI SDK manages the messages
+
+    // Refresh the sidebar to show the new session
+    if (chatHistoryRef.current) {
+      chatHistoryRef.current.refreshSessionsSilently();
+    }
+  }, []);
+
   const value: ChatContextType = {
     selectedSessionId,
     selectedMessages,
@@ -93,6 +109,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     setSidebarOpen,
     toggleSidebar,
     handleChatUpdate,
+    handleSessionCreated,
     chatHistoryRef,
   };
 

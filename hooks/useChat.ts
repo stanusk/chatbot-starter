@@ -1,28 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useChat as useAISDKChat } from "@ai-sdk/react";
 import { UIMessage } from "ai";
 import { ErrorHandlers } from "@/lib/error-handling";
 import { ChatMessage } from "@/lib/database";
-import { modelID } from "@/lib/models";
 import type { ModelID } from "@/types/models";
 import { useAuthContext } from "@/contexts";
 
-// Custom options for this hook (extends the centralized type)
+// Custom options for this hook
 interface UseChatOptions {
   selectedSessionId?: string | null;
   selectedMessages?: ChatMessage[];
   onChatUpdate?: () => void;
+  onSessionCreated?: (sessionId: string) => void;
 }
 
-// Use centralized type but extend with additional properties specific to this implementation
+// Return type for the hook
 interface UseChatReturn {
   // Chat state
   input: string;
   setInput: (input: string) => void;
-  selectedModelId: string;
-  setSelectedModelId: (model: string) => void;
+  selectedModelId: ModelID;
+  setSelectedModelId: (model: ModelID) => void;
   isReasoningEnabled: boolean;
   setIsReasoningEnabled: (enabled: boolean) => void;
   sessionId: string | null;
@@ -43,68 +43,58 @@ export function useChat({
   selectedSessionId = null,
   selectedMessages = [],
   onChatUpdate,
+  onSessionCreated,
 }: UseChatOptions): UseChatReturn {
   const [input, setInput] = useState<string>("");
-  const [selectedModelId, setSelectedModelId] = useState<string>(
-    (process.env.NEXT_PUBLIC_DEFAULT_MODEL as string) || "sonnet-3.7"
+  const [selectedModelId, setSelectedModelId] = useState<ModelID>(
+    (process.env.NEXT_PUBLIC_DEFAULT_MODEL as ModelID) || "sonnet-3.7"
   );
   const [isReasoningEnabled, setIsReasoningEnabled] = useState<boolean>(true);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const sessionIdRef = useRef<string | null>(null);
   
-  // Use auth context instead of duplicating auth logic
+  // Use auth context for user info
   const { user, isClient } = useAuthContext();
   const userId = user?.id || null;
 
-  // Update session ID when a session is selected from history
-  useEffect(() => {
-    if (selectedSessionId) {
-      setSessionId(selectedSessionId);
-      sessionIdRef.current = selectedSessionId;
-    } else {
-      // When starting a new chat, clear the session ID
-      setSessionId(null);
-      sessionIdRef.current = null;
-    }
-  }, [selectedSessionId]);
+  // Session ID comes from props (selectedSessionId) - single source of truth
+  const sessionId = selectedSessionId;
 
-  const currentSessionId = selectedSessionId || sessionId;
-
-  // Extract callback handlers for better readability and testability
+  // Handle response from server (extract new session ID if created)
   const handleResponse = useCallback((response: Response) => {
-    // Extract session ID from response headers if available
     const newSessionId = response.headers.get("X-Session-ID");
-    if (newSessionId && !sessionId && !selectedSessionId) {
-      // Set both ref (immediate) and state (for UI updates)
-      sessionIdRef.current = newSessionId;
-      setSessionId(newSessionId);
-      // Notify parent that a new session was created
-      if (onChatUpdate) {
-        onChatUpdate();
-      }
+    if (newSessionId && !sessionId && onSessionCreated) {
+      // Only notify parent about new session creation
+      onSessionCreated(newSessionId);
     }
-  }, [sessionId, selectedSessionId, onChatUpdate]);
+  }, [sessionId, onSessionCreated]);
 
+  // Handle completion (notify parent to refresh sidebar)
   const handleFinish = useCallback(() => {
-    // Also notify when assistant response is complete
     if (onChatUpdate) {
       onChatUpdate();
     }
   }, [onChatUpdate]);
 
+  // AI SDK Chat hook
   const { messages, append, status, stop, setMessages } = useAISDKChat({
-    id: selectedSessionId || sessionId || "primary",
+    id: sessionId || `new-chat-${Date.now()}`, // Use unique ID for new chats to force reset
     api: "/api/chat",
+    initialMessages: selectedMessages?.length > 0 ? 
+      selectedMessages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        createdAt: msg.created_at ? new Date(msg.created_at) : new Date(),
+      })) : undefined,
     body: {
       selectedModelId,
       isReasoningEnabled,
-      sessionId: currentSessionId,
+      sessionId,
       userId,
     },
     keepLastMessageOnError: true,
     onError: (error) => {
       ErrorHandlers.aiProviderError("Chat streaming error", error, {
-        sessionId: currentSessionId || undefined,
+        sessionId: sessionId || undefined,
         userId: userId || undefined,
         component: "useChat",
         action: "streamText",
@@ -115,72 +105,19 @@ export function useChat({
     onFinish: handleFinish,
   });
 
-  // Load selected messages when a session is selected
+  // Reset messages when starting a new chat (sessionId becomes null)
   useEffect(() => {
-    if (selectedMessages && selectedMessages.length > 0) {
-      try {
-        const formattedMessages = selectedMessages.map((msg) => {
-          // Validate required fields before processing
-          if (!msg || typeof msg.id !== 'string' || !msg.role || !msg.content) {
-            throw new Error(`Invalid message format: missing required fields`);
-          }
-
-          // Validate and convert created_at to Date
-          let createdAt: Date;
-          if (msg.created_at) {
-            createdAt = new Date(msg.created_at);
-            // Check if date conversion was successful
-            if (isNaN(createdAt.getTime())) {
-              throw new Error(`Invalid date format for message ${msg.id}: ${msg.created_at}`);
-            }
-          } else {
-            // Fallback to current date if created_at is missing
-            createdAt = new Date();
-            console.warn(`Message ${msg.id} missing created_at, using current date`);
-          }
-
-          return {
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-            createdAt,
-          };
-        });
-        
-        setMessages(formattedMessages);
-      } catch (error) {
-        ErrorHandlers.componentError("Failed to format selected messages", error, {
-          sessionId: selectedSessionId || undefined,
-          component: "useChat",
-          action: "formatSelectedMessages",
-          metadata: { messageCount: selectedMessages?.length }
-        });
-        
-        // Preserve previous messages state to avoid clearing the chat
-        // Only clear if there were no previous messages
-        if (messages.length === 0) {
-          setMessages([]);
-        }
-      }
-    } else if (
-      selectedMessages &&
-      selectedMessages.length === 0 &&
-      selectedSessionId === null
-    ) {
-      // Clear messages when starting a new chat
+    if (!sessionId && (!selectedMessages || selectedMessages.length === 0)) {
+      // Starting a new chat - clear any existing messages
       setMessages([]);
     }
-  }, [selectedMessages, selectedSessionId, setMessages, messages.length]);
+  }, [sessionId, selectedMessages, setMessages]);
 
   const isGeneratingResponse = ["streaming", "submitted"].includes(status);
 
-  // Extract message sending logic to reuse for both Enter key and button
+  // Send message function
   const sendMessage = useCallback(() => {
-    if (input === "") {
-      return;
-    }
-
-    if (isGeneratingResponse) {
+    if (!input.trim() || isGeneratingResponse) {
       return;
     }
 

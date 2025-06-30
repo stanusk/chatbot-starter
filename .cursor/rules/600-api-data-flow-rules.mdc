@@ -37,6 +37,12 @@ User Input → API Route → AI Provider → Stream Response → Save to DB → 
 - Provide user feedback for connection/AI failures
 - Log errors appropriately without exposing sensitive data
 
+### State Management Principles
+- **Single Source of Truth**: Use one variable for each piece of state (avoid: selectedSessionId, sessionId, sessionIdRef, currentSessionId for same data)
+- **Prefer null over magic strings**: Use `null` for "new chat" state instead of `"__NEW_CHAT__"`
+- **Avoid complex state synchronization**: Don't sync state between multiple useState, useRef, and computed values
+- **Let parent components own session state**: Child components should receive session ID as props, not manage it internally
+
 ### State Management
 - Use React state for UI-specific data
 - Use Supabase real-time for persistent chat data

@@ -11,6 +11,7 @@ export function Chat({
   selectedSessionId = null,
   selectedMessages = [],
   onChatUpdate,
+  onSessionCreated,
 }: ChatProps) {
   const {
     input,
@@ -30,6 +31,7 @@ export function Chat({
     selectedSessionId,
     selectedMessages,
     onChatUpdate,
+    onSessionCreated,
   });
 
   return (

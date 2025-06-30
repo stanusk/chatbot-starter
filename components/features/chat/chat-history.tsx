@@ -81,11 +81,11 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
         <div
           role="button"
           tabIndex={0}
-          onClick={() => onSessionSelect?.("", [])}
+          onClick={() => onSessionSelect?.(null, [])}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              onSessionSelect?.("", []);
+              onSessionSelect?.(null, []);
             }
           }}
           aria-label="Start a new chat conversation"

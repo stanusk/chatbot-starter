@@ -8,6 +8,7 @@ export function MainContent({
   onNewSession,
   onChatUpdate,
   onMenuClick,
+  onSessionCreated,
 }: MainContentProps) {
   return (
     <div className="flex-1 flex flex-col lg:ml-0">
@@ -19,6 +20,7 @@ export function MainContent({
           selectedMessages={selectedMessages}
           onNewSession={onNewSession}
           onChatUpdate={onChatUpdate}
+          onSessionCreated={onSessionCreated}
         />
       </div>
     </div>

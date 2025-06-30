@@ -3,8 +3,7 @@
  */
 
 import React from "react";
-// Using legacy modelID type for backward compatibility with existing UI components
-// TODO: Migrate to ModelID when lib/models.ts is fully updated
+import type { ModelID } from "./models";
 
 // Button component types
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -22,8 +21,8 @@ export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 export interface ChatInputProps {
   input: string;
   setInput: (value: string) => void;
-  selectedModelId: string; // Using string for backward compatibility
-  setSelectedModelId: (modelId: string) => void;
+  selectedModelId: ModelID;
+  setSelectedModelId: (modelId: ModelID) => void;
   isReasoningEnabled: boolean;
   setIsReasoningEnabled: (enabled: boolean) => void;
   isGeneratingResponse: boolean;
@@ -33,8 +32,8 @@ export interface ChatInputProps {
 
 // Model selector component types
 export interface ModelSelectorProps {
-  selectedModelId: string; // Using string for backward compatibility
-  onModelChange: (modelId: string) => void;
+  selectedModelId: ModelID;
+  onModelChange: (modelId: ModelID) => void;
 }
 
 // Reasoning toggle component types

@@ -13,6 +13,7 @@ export default function Home() {
     startNewChat,
     setSidebarOpen,
     handleChatUpdate,
+    handleSessionCreated,
     chatHistoryRef,
   } = useChatContext();
 
@@ -40,6 +41,7 @@ export default function Home() {
         selectedMessages={selectedMessages}
         onNewSession={startNewChat}
         onChatUpdate={handleChatUpdate}
+        onSessionCreated={handleSessionCreated}
         onMenuClick={() => setSidebarOpen(true)}
       />
     </div>

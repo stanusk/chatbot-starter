@@ -24,6 +24,11 @@ Follow these instructions when working with TypeScript in this Next.js project.
 - Use JSDoc comments for complex functions and keep them updated
 - Leverage TypeScript's strict mode features
 
+## Type Migration Rules
+- **Complete migrations immediately**: Never leave TODO comments for type migrations in committed code
+- **Update all usages when changing types**: If updating from `string` to `ModelID`, update ALL components in the same PR
+- **Consistent null handling**: If a type accepts `string | null`, update ALL related interfaces consistently
+
 ### Next.js Specific
 - Properly type Server Component props and params
 - Use proper typing for API route handlers
