@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getChatSessions } from "@/lib/database";
 
+/**
+ * Handles GET requests to retrieve chat sessions, optionally filtered by user ID.
+ *
+ * Extracts the `userId` query parameter from the request URL and fetches the corresponding chat sessions. Returns the sessions as a JSON response. If an error occurs, responds with a 500 status and an error message.
+ *
+ * @param request - The incoming HTTP request
+ * @returns A JSON response containing chat sessions or an error message
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
