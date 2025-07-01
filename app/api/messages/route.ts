@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getChatMessages } from "@/lib/database";
+import { ErrorHandlers } from "@/lib/error-handling";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +18,12 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ messages });
   } catch (error) {
-    console.error("Error fetching chat messages:", error);
+    ErrorHandlers.supabaseError("Failed to fetch chat messages", error, {  
+      component: "api/messages",
+      action: "GET",
+      userId: request.nextUrl.searchParams.get("userId") || undefined
+    });
+    
     return NextResponse.json(
       { error: "Failed to fetch chat messages" },
       { status: 500 }
