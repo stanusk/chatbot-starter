@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getChatMessages } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 
+/**
+ * Handles GET requests to retrieve chat messages for a given session.
+ *
+ * Extracts the `sessionId` from the request's query parameters and returns the associated chat messages in a JSON response. Responds with an error and appropriate status code if the `sessionId` is missing or if an error occurs during retrieval.
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
