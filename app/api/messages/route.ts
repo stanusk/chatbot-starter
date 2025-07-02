@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ messages });
   } catch (error) {
-    ErrorHandlers.supabaseError("Failed to fetch chat messages", error, {  
+    ErrorHandlers.supabaseError("Failed to fetch chat messages", error, {
       component: "api/messages",
       action: "GET",
-      userId: request.nextUrl.searchParams.get("userId") || undefined
+      sessionId: sessionId || "unknown"
     });
     
     return NextResponse.json(
