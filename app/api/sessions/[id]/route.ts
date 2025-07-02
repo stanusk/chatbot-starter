@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { softDeleteChatSession, getChatSession } from "@/lib/database/supabase";
+import { softDeleteChatSession, updateChatSessionTitle } from "@/lib/database/supabase";
 import { ErrorHandlers } from "@/lib/error-handling";
-import { getAuthenticatedUser } from "@/lib/auth";
-import { ApiErrors } from "@/lib/api/error-responses";
-
-// UUID validation regex
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+import { validateUUIDForAPI } from "@/utils/validation";
+import { createAuthenticatedSupabaseClient } from "@/lib/auth/server";
 
 export async function DELETE(
   request: NextRequest,
@@ -14,13 +11,6 @@ export async function DELETE(
   let sessionId: string | undefined;
   
   try {
-    // Authentication check - verify user is authenticated
-    const user = await getAuthenticatedUser(request);
-    
-    if (!user) {
-      return ApiErrors.unauthorized("Authentication required to delete chat sessions");
-    }
-
     const { id } = await params;
     sessionId = id;
 
@@ -32,28 +22,17 @@ export async function DELETE(
     }
 
     // Validate UUID format
-    if (!UUID_REGEX.test(sessionId)) {
+    const uuidValidation = validateUUIDForAPI(sessionId, "Session ID");
+    if (!uuidValidation.isValid) {
       return NextResponse.json(
-        { error: "Invalid session ID format" },
+        { error: uuidValidation.error },
         { status: 400 }
       );
     }
 
-    // Authorization check - verify the user owns the session
-    const session = await getChatSession(sessionId);
-    
-    if (!session) {
-      return ApiErrors.notFound("Chat session not found");
-    }
-    
-    // Check if the session belongs to the authenticated user
-    if (session.user_id && session.user_id !== user.id) {
-      return ApiErrors.forbidden("Access denied: You can only delete your own chat sessions");
-    }
-
-    // Use the admin client function for soft delete
-    // This bypasses RLS but ensures the operation works reliably
-    await softDeleteChatSession(sessionId);
+    // Create authenticated client - RLS will ensure only owner can delete
+    const supabase = await createAuthenticatedSupabaseClient();
+    await softDeleteChatSession(supabase, sessionId);
 
     return NextResponse.json({ 
       success: true, 
@@ -61,7 +40,7 @@ export async function DELETE(
       message: "Session moved to trash successfully" 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     ErrorHandlers.supabaseError("Error deleting chat session", error, {
       component: "api/sessions/[id]",
       action: "DELETE",
@@ -70,6 +49,67 @@ export async function DELETE(
     
     return NextResponse.json(
       { error: "Failed to delete session" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  let sessionId: string | undefined;
+  
+  try {
+    const { id } = await params;
+    sessionId = id;
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: "Session ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate UUID format
+    const uuidValidation = validateUUIDForAPI(sessionId, "Session ID");
+    if (!uuidValidation.isValid) {
+      return NextResponse.json(
+        { error: uuidValidation.error },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const { title } = body;
+
+    if (!title) {
+      return NextResponse.json(
+        { error: "Title is required" },
+        { status: 400 }
+      );
+    }
+
+    // Create authenticated client - RLS will ensure only owner can update
+    const supabase = await createAuthenticatedSupabaseClient();
+    await updateChatSessionTitle(supabase, sessionId, title);
+
+    return NextResponse.json({ 
+      success: true, 
+      sessionId: sessionId,
+      title: title,
+      message: "Session title updated successfully" 
+    });
+
+  } catch (error: unknown) {
+    ErrorHandlers.supabaseError("Error updating chat session title", error, {
+      component: "api/sessions/[id]",
+      action: "PATCH",
+      sessionId: sessionId || "unknown"
+    });
+    
+    return NextResponse.json(
+      { error: "Failed to update session title" },
       { status: 500 }
     );
   }

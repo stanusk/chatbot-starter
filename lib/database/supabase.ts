@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ChatSession, ChatMessage, MessageRole } from "@/types/database";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -11,42 +12,30 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Client for browser/client-side operations
-export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
-    : null;
+// Note: Browser client moved to lib/supabase/client.ts for SSR compatibility
+// Use supabaseBrowser from @/lib/supabase/client for client-side operations
 
-// Admin client for server-side operations with elevated permissions
-export const supabaseAdmin =
-  supabaseUrl && supabaseServiceRoleKey
-    ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      })
-    : null;
+// Admin client removed - using RLS-based security with authenticated clients
+// All operations now go through API routes with proper authentication
 
 // Re-export database types from centralized types for backward compatibility
 export type { ChatSession, ChatMessage, MessageRole } from "@/types/database";
 
-// Helper functions
-// Note: Using supabaseAdmin for session/message operations to ensure
-// reliable data persistence regardless of user authentication state.
-// This bypasses RLS and should only be used in server-side contexts.
+// Helper functions using RLS-based security
+// These functions now accept a supabase client instance from the calling API route
 export async function createChatSession(
-  userId?: string,
+  supabase: SupabaseClient,
   title?: string
 ): Promise<ChatSession> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
+  // Get current user - RLS will automatically set user_id based on auth context
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError) throw authError;
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("chat_sessions")
     .insert({
-      user_id: userId,
+      user_id: user?.id || null, // Use authenticated user ID or null for anonymous
       title: title || "New Chat",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -59,6 +48,7 @@ export async function createChatSession(
 }
 
 export async function saveChatMessage(
+  supabase: SupabaseClient,
   sessionId: string,
   role: MessageRole,
   content: string,
@@ -66,11 +56,7 @@ export async function saveChatMessage(
   score?: number,
   metadata?: Record<string, unknown>
 ): Promise<ChatMessage> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
-
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("chat_messages")
     .insert({
       session_id: sessionId,
@@ -87,7 +73,7 @@ export async function saveChatMessage(
   if (error) throw error;
 
   // Update the session's updated_at timestamp
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await supabase
     .from("chat_sessions")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", sessionId);
@@ -98,13 +84,10 @@ export async function saveChatMessage(
 }
 
 export async function getChatMessages(
+  supabase: SupabaseClient,
   sessionId: string
 ): Promise<ChatMessage[]> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
-
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("chat_messages")
     .select("*")
     .eq("session_id", sessionId)
@@ -114,37 +97,25 @@ export async function getChatMessages(
   return data || [];
 }
 
-export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
-
-  let query = supabaseAdmin
+export async function getChatSessions(
+  supabase: SupabaseClient
+): Promise<ChatSession[]> {
+  // RLS policies will automatically filter sessions based on authenticated user
+  // RLS also handles trash filtering, so no manual filtering needed
+  const { data, error } = await supabase
     .from("chat_sessions")
     .select("*")
-    .eq("trash", false) // Exclude trashed sessions
     .order("updated_at", { ascending: false });
-
-  if (userId) {
-    // Get sessions only for this specific user
-    query = query.eq("user_id", userId);
-  } else {
-    // If no userId provided, only get sessions with null user_id (anonymous sessions)
-    query = query.is("user_id", null);
-  }
-
-  const { data, error } = await query;
 
   if (error) throw error;
   return data || [];
 }
 
-export async function softDeleteChatSession(sessionId: string): Promise<void> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
-
-  const { error } = await supabaseAdmin
+export async function softDeleteChatSession(
+  supabase: SupabaseClient,
+  sessionId: string
+): Promise<void> {
+  const { error } = await supabase
     .from("chat_sessions")
     .update({ 
       trash: true,
@@ -153,17 +124,15 @@ export async function softDeleteChatSession(sessionId: string): Promise<void> {
     .eq("id", sessionId);
 
   if (error) throw error;
+  // RLS will ensure only the owner can delete their sessions
 }
 
 export async function updateChatSessionTitle(
+  supabase: SupabaseClient,
   sessionId: string,
   title: string
 ): Promise<void> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
-
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from("chat_sessions")
     .update({ title, updated_at: new Date().toISOString() })
     .eq("id", sessionId);
@@ -171,12 +140,11 @@ export async function updateChatSessionTitle(
   if (error) throw error;
 }
 
-export async function getChatSession(sessionId: string): Promise<ChatSession | null> {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase admin client not initialized");
-  }
-
-  const { data, error } = await supabaseAdmin
+export async function getChatSession(
+  supabase: SupabaseClient,
+  sessionId: string
+): Promise<ChatSession | null> {
+  const { data, error } = await supabase
     .from("chat_sessions")
     .select("*")
     .eq("id", sessionId)
@@ -184,7 +152,7 @@ export async function getChatSession(sessionId: string): Promise<ChatSession | n
 
   if (error) {
     if (error.code === 'PGRST116' || error.message?.includes('No rows')) {
-      // No rows returned
+      // No rows returned or user doesn't have access (RLS filtered it out)
       return null;
     }
     throw error;

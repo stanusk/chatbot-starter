@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/database";
+import { supabaseBrowser } from "@/lib/supabase/client";
 import { ErrorHandlers } from "@/lib/error-handling";
 
 interface AuthContextType {
@@ -46,13 +46,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (!isClient) return;
 
-    if (!supabase) {
-      console.warn("Supabase not initialized - authentication disabled");
-      return;
-    }
-
-    // Store supabase reference to ensure TypeScript knows it's not null
-    const supabaseClient = supabase;
+    // Use SSR-compatible browser client
+    const supabaseClient = supabaseBrowser;
 
     // Get initial session
     const getSession = async () => {
@@ -105,15 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setLoading(true);
     try {
-      if (!supabase) {
-        ErrorHandlers.authError("Authentication not available", undefined, {
-          component: "AuthProvider",
-          action: "signIn",
-        });
-        return;
-      }
-
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabaseBrowser.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo:
@@ -149,15 +136,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = useCallback(async () => {
     setLoading(true);
     try {
-      if (!supabase) {
-        ErrorHandlers.authError("Authentication not available", undefined, {
-          component: "AuthProvider",
-          action: "signOut",
-        });
-        return;
-      }
-
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabaseBrowser.auth.signOut();
       if (error) {
         ErrorHandlers.authError("Sign out failed", error, {
           component: "AuthProvider",

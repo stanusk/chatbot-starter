@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { ChatSession, ChatMessage } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 import { formatRelativeDate } from "@/utils";
@@ -19,15 +19,22 @@ export function useChatHistory({
   
   // Auto-refresh timestamps every minute
   const refreshKey = useAutoRefreshTimestamps();
+  
+  // Use refs to avoid unnecessary dependencies
+  const getSessionsRef = useRef(getSessions);
+  const getMessagesRef = useRef(getMessages);
+  getSessionsRef.current = getSessions;
+  getMessagesRef.current = getMessages;
 
   const loadSessions = useCallback(async (showLoading = true) => {
     if (!isClient || !user) return;
-
+    
     if (showLoading) {
       setLoading(true);
     }
     try {
-      const userSessions = await getSessions(user.id);
+      // Don't pass userId since server now uses RLS to filter automatically
+      const userSessions = await getSessionsRef.current();
       setSessions(userSessions);
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to load chat sessions", error, {
@@ -48,7 +55,7 @@ export function useChatHistory({
     } else {
       setSessions([]);
     }
-  }, [isClient, user, loadSessions]);
+  }, [isClient, user]);
 
   // Expose refresh function for external use
   const refreshSessions = useCallback(() => {
@@ -67,7 +74,7 @@ export function useChatHistory({
   const handleSessionClick = useCallback(async (session: ChatSession) => {
     if (onSessionSelect) {
       try {
-        const messages = await getMessages(session.id);
+        const messages = await getMessagesRef.current(session.id);
         onSessionSelect(session.id, messages);
       } catch (error) {
         ErrorHandlers.supabaseError("Failed to load chat messages", error, {

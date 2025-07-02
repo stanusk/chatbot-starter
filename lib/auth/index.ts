@@ -4,7 +4,6 @@
  */
 
 import { createServerClient } from "@supabase/ssr";
-import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { ApiErrors } from "@/lib/api/error-responses";
 import type { User } from "@supabase/supabase-js";
@@ -24,7 +23,7 @@ async function createAuthClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+        setAll(cookiesToSet: { name: string; value: string; options?: { [key: string]: unknown } }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
@@ -44,7 +43,7 @@ async function createAuthClient() {
  * Returns the user if authenticated, null if not authenticated
  * Uses supabase.auth.getUser() which validates the token with Supabase Auth server
  */
-export async function getAuthenticatedUser(request: NextRequest): Promise<User | null> {
+export async function getAuthenticatedUser(): Promise<User | null> {
   try {
     const supabase = await createAuthClient();
     
@@ -68,8 +67,8 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<User |
  * Middleware function to require authentication for API routes
  * Returns the authenticated user or throws an unauthorized response
  */
-export async function requireAuth(request: NextRequest): Promise<User> {
-  const user = await getAuthenticatedUser(request);
+export async function requireAuth(): Promise<User> {
+  const user = await getAuthenticatedUser();
   
   if (!user) {
     throw ApiErrors.unauthorized("Authentication required to access this resource");
@@ -82,7 +81,7 @@ export async function requireAuth(request: NextRequest): Promise<User> {
  * Check if a user is authenticated without throwing errors
  * Useful for optional authentication scenarios
  */
-export async function isAuthenticated(request: NextRequest): Promise<boolean> {
-  const user = await getAuthenticatedUser(request);
+export async function isAuthenticated(): Promise<boolean> {
+  const user = await getAuthenticatedUser();
   return user !== null;
 } 

@@ -1,24 +1,31 @@
 "use client";
 
 import { useCallback } from "react";
-import {
-  createChatSession,
-  saveChatMessage,
-  updateChatSessionTitle,
-  generateChatTitle,
-} from "@/lib/database";
+import { generateChatTitle } from "@/lib/database";
 import type { ChatSession, ChatMessage } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 import type { UseSupabaseReturn } from "@/types/hooks";
 
 export function useSupabase(): UseSupabaseReturn {
-  const createSession = useCallback(async (userId?: string, title?: string): Promise<ChatSession | null> => {
+  const createSession = useCallback(async (_userId?: string, title?: string): Promise<ChatSession | null> => {
     try {
-      const session = await createChatSession(userId, title);
-      return session;
+      const response = await fetch('/api/sessions', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: title || "New Chat" }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.session || null;
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to create chat session", error, {
-        userId,
         component: "useSupabase",
         action: "createSession"
       });
@@ -26,10 +33,14 @@ export function useSupabase(): UseSupabaseReturn {
     }
   }, []);
 
-  const getSessions = useCallback(async (userId?: string): Promise<ChatSession[]> => {
+  const getSessions = useCallback(async (): Promise<ChatSession[]> => {
     try {
-      const url = userId ? `/api/sessions?userId=${encodeURIComponent(userId)}` : '/api/sessions';
-      const response = await fetch(url);
+      const response = await fetch('/api/sessions', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -39,7 +50,6 @@ export function useSupabase(): UseSupabaseReturn {
       return data.sessions || [];
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to get chat sessions", error, {
-        userId,
         component: "useSupabase",
         action: "getSessions"
       });
@@ -49,7 +59,19 @@ export function useSupabase(): UseSupabaseReturn {
 
   const updateSessionTitle = useCallback(async (sessionId: string, title: string): Promise<boolean> => {
     try {
-      await updateChatSessionTitle(sessionId, title);
+      const response = await fetch(`/api/sessions/${sessionId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       return true;
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to update session title", error, {
@@ -71,8 +93,28 @@ export function useSupabase(): UseSupabaseReturn {
     metadata?: Record<string, unknown>
   ): Promise<ChatMessage | null> => {
     try {
-      const message = await saveChatMessage(sessionId, role, content, reasoning, score, metadata);
-      return message;
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          role,
+          content,
+          reasoning,
+          score,
+          metadata,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.message || null;
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to save chat message", error, {
         sessionId,
@@ -86,7 +128,12 @@ export function useSupabase(): UseSupabaseReturn {
 
   const getMessages = useCallback(async (sessionId: string): Promise<ChatMessage[]> => {
     try {
-      const response = await fetch(`/api/messages?sessionId=${encodeURIComponent(sessionId)}`);
+      const response = await fetch(`/api/messages?sessionId=${encodeURIComponent(sessionId)}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
