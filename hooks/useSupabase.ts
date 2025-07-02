@@ -4,8 +4,6 @@ import { useCallback } from "react";
 import {
   createChatSession,
   saveChatMessage,
-  getChatMessages,
-  getChatSessions,
   updateChatSessionTitle,
   generateChatTitle,
 } from "@/lib/database";
@@ -13,6 +11,11 @@ import type { ChatSession, ChatMessage } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 import type { UseSupabaseReturn } from "@/types/hooks";
 
+/**
+ * Provides a set of asynchronous functions for managing chat sessions and messages, including creation, retrieval, updating, and message saving, along with a utility for generating session titles.
+ *
+ * Returns an object containing methods for session operations, message operations, and title generation, all with integrated error handling.
+ */
 export function useSupabase(): UseSupabaseReturn {
   const createSession = useCallback(async (userId?: string, title?: string): Promise<ChatSession | null> => {
     try {
@@ -30,8 +33,15 @@ export function useSupabase(): UseSupabaseReturn {
 
   const getSessions = useCallback(async (userId?: string): Promise<ChatSession[]> => {
     try {
-      const sessions = await getChatSessions(userId);
-      return sessions;
+      const url = userId ? `/api/sessions?userId=${encodeURIComponent(userId)}` : '/api/sessions';
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.sessions || [];
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to get chat sessions", error, {
         userId,
@@ -81,8 +91,14 @@ export function useSupabase(): UseSupabaseReturn {
 
   const getMessages = useCallback(async (sessionId: string): Promise<ChatMessage[]> => {
     try {
-      const messages = await getChatMessages(sessionId);
-      return messages;
+      const response = await fetch(`/api/messages?sessionId=${encodeURIComponent(sessionId)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.messages || [];
     } catch (error) {
       ErrorHandlers.supabaseError("Failed to get chat messages", error, {
         sessionId,
