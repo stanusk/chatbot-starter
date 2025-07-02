@@ -10,6 +10,12 @@ import {
   ChevronUpIcon,
   SpinnerIcon,
 } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Copy, Check, Edit3 } from "lucide-react";
+import { toast } from "sonner";
+import { chatConfig } from "@/config/chat";
+import type { UIMessage } from "ai";
 import type {
   ReasoningMessagePartProps,
   TextMessagePartProps,
@@ -100,17 +106,71 @@ export function ReasoningMessagePart({
   );
 }
 
-export function TextMessagePart({ text }: TextMessagePartProps) {
+function CopyButton({ text }: { text: string }) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      toast.success("Copied to clipboard");
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+      toast.error("Failed to copy text");
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-4">
-      <Markdown components={markdownComponents}>{text}</Markdown>
-    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={handleCopy}
+      className="h-6 w-6 p-0"
+      aria-label="Copy message"
+    >
+      <AnimatePresence mode="wait">
+        {isCopied ? (
+          <motion.div
+            key="check"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Check className="h-3 w-3 text-green-600" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="copy"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Copy className="h-3 w-3" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Button>
   );
 }
 
-export function Messages({ messages, status }: MessagesProps) {
+export function TextMessagePart({ text }: TextMessagePartProps) {
+  return <Markdown components={markdownComponents}>{text}</Markdown>;
+}
+
+export function Messages({ messages, status, onEditMessage }: MessagesProps) {
   const messagesRef = useRef<HTMLDivElement>(null);
   const messagesLength = useMemo(() => messages.length, [messages]);
+  const [editingMessageIndex, setEditingMessageIndex] = useState<number | null>(
+    null
+  );
+  const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -118,52 +178,145 @@ export function Messages({ messages, status }: MessagesProps) {
     }
   }, [messagesLength]);
 
+  const handleStartEdit = (messageIndex: number, currentContent: string) => {
+    setEditingMessageIndex(messageIndex);
+    setEditContent(currentContent);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingMessageIndex !== null && onEditMessage) {
+      onEditMessage(editingMessageIndex, editContent.trim());
+      setEditingMessageIndex(null);
+      setEditContent("");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageIndex(null);
+    setEditContent("");
+  };
+
+  const getMessageText = (message: UIMessage): string => {
+    const textParts = message.parts.filter((part: any) => part.type === "text");
+    return textParts.map((part: any) => part.text).join("");
+  };
+
+  // Find the index of the last user message
+  const lastUserMessageIndex = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") {
+        return i;
+      }
+    }
+    return -1;
+  }, [messages]);
+
   return (
     <div
-      className="flex flex-col gap-8 overflow-y-scroll items-center w-full"
+      className="flex flex-col gap-8 overflow-y-auto items-center w-full px-6 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
       ref={messagesRef}
     >
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={cn(
-            "flex flex-col gap-4 last-of-type:mb-12 first-of-type:mt-16 w-full"
-          )}
-        >
-          <div
-            className={cn("flex flex-col gap-4", {
-              "dark:bg-zinc-800 bg-zinc-200 p-2 rounded-xl w-fit ml-auto":
-                message.role === "user",
-              "": message.role === "assistant",
-            })}
-          >
-            {message.parts.map((part, partIndex) => {
-              if (part.type === "text") {
-                return (
-                  <TextMessagePart
-                    key={`${message.id}-${partIndex}`}
-                    text={part.text}
-                  />
-                );
-              }
+      {messages.map((message, messageIndex) => {
+        const isLastUserMessage =
+          chatConfig.enableMessageEditing &&
+          message.role === "user" &&
+          messageIndex === lastUserMessageIndex;
 
-              if (part.type === "reasoning") {
-                return (
-                  <ReasoningMessagePart
-                    key={`${message.id}-${partIndex}`}
-                    // @ts-expect-error export ReasoningUIPart
-                    part={part}
-                    isReasoning={
-                      status === "streaming" &&
-                      partIndex === message.parts.length - 1
-                    }
+        const isEditing = editingMessageIndex === messageIndex;
+        const messageText = getMessageText(message);
+
+        return (
+          <div
+            key={message.id}
+            className={cn(
+              "group flex flex-col gap-4 last-of-type:mb-12 first-of-type:mt-16 w-full"
+            )}
+          >
+            <div
+              className={cn({
+                "dark:bg-zinc-800 bg-zinc-200 p-2 rounded-xl w-fit ml-auto":
+                  message.role === "user",
+              })}
+            >
+              {isEditing ? (
+                <div className="flex flex-col gap-2 w-full">
+                  <Textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="min-h-[80px] resize-none"
+                    placeholder="Edit your message..."
+                    autoFocus
                   />
-                );
-              }
-            })}
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleSaveEdit}>
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {message.parts.map((part, partIndex) => {
+                    if (part.type === "text") {
+                      return (
+                        <TextMessagePart
+                          key={`${message.id}-${partIndex}`}
+                          text={part.text}
+                        />
+                      );
+                    }
+
+                    if (part.type === "reasoning") {
+                      return (
+                        <ReasoningMessagePart
+                          key={`${message.id}-${partIndex}`}
+                          // @ts-expect-error export ReasoningUIPart
+                          part={part}
+                          isReasoning={
+                            status === "streaming" &&
+                            partIndex === message.parts.length - 1
+                          }
+                        />
+                      );
+                    }
+
+                    return null;
+                  })}
+
+                  {/* Action buttons - positioned below content */}
+                  {!isEditing &&
+                    (message.role === "assistant" || isLastUserMessage) && (
+                      <div className="flex justify-end gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {message.role === "assistant" && (
+                          <CopyButton text={messageText} />
+                        )}
+                        {isLastUserMessage && onEditMessage && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleStartEdit(messageIndex, messageText)
+                            }
+                            className="h-6 w-6 p-0"
+                            aria-label="Edit message"
+                          >
+                            <Edit3 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {status === "submitted" && (
         <div className="text-zinc-500 mb-12 w-full">Hmm...</div>

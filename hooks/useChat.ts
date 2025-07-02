@@ -36,6 +36,7 @@ interface UseChatReturn {
   
   // Actions
   sendMessage: () => void;
+  editMessage: (messageIndex: number, newContent: string) => void;
   stop: () => void;
 }
 
@@ -75,7 +76,7 @@ export function useChat({
   }, [onChatUpdate]);
 
   // AI SDK Chat hook
-  const { messages, append, status, stop, setMessages } = useAISDKChat({
+  const { messages, append, status, stop, setMessages, reload } = useAISDKChat({
     id: sessionId || `new-chat-${Date.now()}`, // Use unique ID for new chats to force reset
     api: "/api/chat",
     initialMessages: selectedMessages?.length > 0 ? 
@@ -130,6 +131,35 @@ export function useChat({
     setInput("");
   }, [input, isGeneratingResponse, append]);
 
+  // Edit message function
+  const editMessage = useCallback((messageIndex: number, newContent: string) => {
+    if (isGeneratingResponse || !newContent.trim()) {
+      return;
+    }
+
+    // Create a new messages array with only messages up to the edited one
+    // and replace the edited message with the new content
+    const messagesToKeep = messages.slice(0, messageIndex);
+    
+    // Create the new edited message
+    const editedMessage = {
+      id: messages[messageIndex].id,
+      role: "user" as const,
+      content: newContent,
+      createdAt: new Date(),
+    };
+
+    // Set the new message array with the edited message
+    const newMessages = [...messagesToKeep, editedMessage];
+    setMessages(newMessages);
+
+    // Use AI SDK's reload to trigger reprocessing from the current state
+    // This should cause it to generate a new assistant response
+    setTimeout(() => {
+      reload();
+    }, 100);
+  }, [messages, isGeneratingResponse, setMessages, reload]);
+
   return {
     // Chat state
     input,
@@ -149,6 +179,7 @@ export function useChat({
     
     // Actions
     sendMessage,
+    editMessage,
     stop,
   };
 } 

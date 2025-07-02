@@ -18,12 +18,15 @@ interface ChatContextType {
 
   // UI state
   sidebarOpen: boolean;
+  sidebarPinned: boolean;
 
   // Actions
   selectSession: (sessionId: string | null, messages: ChatMessage[]) => void;
   startNewChat: () => void;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+  openSidebar: () => void;
+  closeSidebar: () => void;
   handleChatUpdate: () => void;
   handleSessionCreated: (sessionId: string) => void;
   cleanupPlaceholder: () => void;
@@ -53,6 +56,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [selectedMessages, setSelectedMessages] = useState<ChatMessage[]>([]);
   const [hasPlaceholder, setHasPlaceholder] = useState(false);
   const [sidebarOpen, setSidebarOpenState] = useState(false);
+  const [sidebarPinned, setSidebarPinned] = useState(false);
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
 
   const startNewChat = useCallback(() => {
@@ -80,10 +84,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
         setHasPlaceholder(false);
       }
 
-      // Close sidebar on mobile when a session is selected
-      setSidebarOpenState(false);
+      // Only close sidebar on mobile/touch devices when a session is selected, and only if not pinned
+      if (window.matchMedia("(pointer: coarse)").matches && !sidebarPinned) {
+        setSidebarOpenState(false);
+      }
     },
-    []
+    [sidebarPinned]
   );
 
   const setSidebarOpen = useCallback((open: boolean) => {
@@ -91,7 +97,22 @@ export function ChatProvider({ children }: ChatProviderProps) {
   }, []);
 
   const toggleSidebar = useCallback(() => {
-    setSidebarOpenState((prev) => !prev);
+    setSidebarOpenState((prev) => {
+      const newOpen = !prev;
+      // When toggling via button, always set pinned state
+      setSidebarPinned(newOpen);
+      return newOpen;
+    });
+  }, []);
+
+  const openSidebar = useCallback(() => {
+    setSidebarOpenState(true);
+    // Don't change pinned state when opening via hover
+  }, []);
+
+  const closeSidebar = useCallback(() => {
+    setSidebarOpenState(false);
+    // Don't change pinned state when closing via hover/ESC
   }, []);
 
   const handleChatUpdate = useCallback(() => {
@@ -122,7 +143,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     // Clean up unused placeholder
     if (hasPlaceholder) {
       setHasPlaceholder(false);
-      // If we're currently on the placeholder (selectedSessionId is null), 
+      // If we're currently on the placeholder (selectedSessionId is null),
       // we might want to keep the UI state as is, or we could clear it
       // For now, we'll just clear the placeholder flag
     }
@@ -133,10 +154,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
     selectedMessages,
     hasPlaceholder,
     sidebarOpen,
+    sidebarPinned,
     selectSession,
     startNewChat,
     setSidebarOpen,
     toggleSidebar,
+    openSidebar,
+    closeSidebar,
     handleChatUpdate,
     handleSessionCreated,
     cleanupPlaceholder,

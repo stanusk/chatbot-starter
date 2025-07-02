@@ -2,7 +2,7 @@ import type { MobileHeaderProps } from "@/types/components";
 
 export function MobileHeader({ onMenuClick }: MobileHeaderProps) {
   return (
-    <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-background">
+    <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-background min-h-[73px]">
       <button
         onClick={onMenuClick}
         className="p-2 rounded-md hover:bg-accent hover:text-accent-foreground"

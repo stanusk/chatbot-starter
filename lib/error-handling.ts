@@ -117,9 +117,10 @@ function logError(error: AppError): void {
 
 /**
  * Shows user-friendly toast notification
+ * Only works in browser environment
  */
 function showErrorToast(error: AppError): void {
-  if (!error.shouldShowToast) return;
+  if (!error.shouldShowToast || typeof window === 'undefined') return;
 
   // Choose toast type based on severity
   switch (error.severity) {
@@ -127,7 +128,7 @@ function showErrorToast(error: AppError): void {
       toast.info(error.userMessage);
       break;
     case ErrorSeverity.MEDIUM:
-      toast.warning(error.userMessage);
+      toast.error(error.userMessage); // Use toast.error instead of toast.warning
       break;
     case ErrorSeverity.HIGH:
     case ErrorSeverity.CRITICAL:

@@ -23,12 +23,15 @@ export interface ChatContextType {
   
   // UI state
   sidebarOpen: boolean;
+  sidebarPinned: boolean;
   
   // Actions
   selectSession: (sessionId: string, messages: ChatMessage[]) => void;
   startNewChat: () => void;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+  openSidebar: () => void;
+  closeSidebar: () => void;
   handleChatUpdate: () => void;
   
   // Chat history ref for external operations

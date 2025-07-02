@@ -22,6 +22,35 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
       onSessionSelect,
     });
 
+    const handleDeleteSession = async (sessionId: string) => {
+      try {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete session");
+        }
+
+        // Check if we're deleting the currently active session
+        const isDeletingActiveSession = currentSessionId === sessionId;
+
+        // Refresh the sessions list silently to update the UI
+        await refreshSessionsSilently();
+
+        // If we deleted the current session, start a new chat
+        if (isDeletingActiveSession) {
+          startNewChat();
+        }
+      } catch (error) {
+        console.error("Error deleting session:", error);
+        throw error; // Re-throw to let the component handle the error display
+      }
+    };
+
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -115,6 +144,7 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
             isSelected={currentSessionId === session.id}
             onClick={() => handleSessionClick(session)}
             formatDate={formatDate}
+            onDelete={handleDeleteSession}
           />
         ))}
       </div>

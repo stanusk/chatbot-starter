@@ -122,6 +122,7 @@ export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
   let query = supabaseAdmin
     .from("chat_sessions")
     .select("*")
+    .eq("trash", false) // Exclude trashed sessions
     .order("updated_at", { ascending: false });
 
   if (userId) {
@@ -136,6 +137,22 @@ export async function getChatSessions(userId?: string): Promise<ChatSession[]> {
 
   if (error) throw error;
   return data || [];
+}
+
+export async function softDeleteChatSession(sessionId: string): Promise<void> {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized");
+  }
+
+  const { error } = await supabaseAdmin
+    .from("chat_sessions")
+    .update({ 
+      trash: true,
+      updated_at: new Date().toISOString() 
+    })
+    .eq("id", sessionId);
+
+  if (error) throw error;
 }
 
 export async function updateChatSessionTitle(

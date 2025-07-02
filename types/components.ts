@@ -18,6 +18,7 @@ export interface SidebarProps {
   user: User | null;
   onSessionSelect: (sessionId: string | null, messages: ChatMessage[]) => void;
   currentSessionId: string | null;
+  isPinned?: boolean;
 }
 
 export interface MainContentProps {
@@ -27,6 +28,8 @@ export interface MainContentProps {
   onChatUpdate: () => void;
   onMenuClick: () => void;
   onSessionCreated?: (sessionId: string) => void;
+  sidebarOpen?: boolean;
+  sidebarPinned?: boolean;
 }
 
 // Chat component types
@@ -41,6 +44,7 @@ export interface ChatProps {
 export interface MessagesProps {
   messages: Array<UIMessage>;
   status: UseChatHelpers["status"];
+  onEditMessage?: (messageIndex: number, newContent: string) => void;
 }
 
 // Message part types
