@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ErrorHandlers } from "@/lib/error-handling";
 import type { ChatSession } from "@/lib/database";
 
 interface ChatHistoryItemProps {
@@ -98,7 +99,11 @@ export function ChatHistoryItem({
       await onDelete(session.id);
       toast.success("Session deleted successfully");
     } catch (error) {
-      console.error("Failed to delete session:", error);
+      ErrorHandlers.componentError("Failed to delete session", error, {
+        component: "ChatHistoryItem",
+        action: "handleDelete",
+        sessionId: session.id,
+      });
       toast.error("Failed to delete session. Please try again.");
     } finally {
       setIsDeleting(false);

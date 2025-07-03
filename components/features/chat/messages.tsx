@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Copy, Check, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 import { chatConfig } from "@/config/chat";
+import { ErrorHandlers } from "@/lib/error-handling";
 import type { UIMessage } from "ai";
 import type {
   ReasoningMessagePartProps,
@@ -120,7 +121,10 @@ function CopyButton({ text }: { text: string }) {
         setIsCopied(false);
       }, 2000);
     } catch (error) {
-      console.error("Failed to copy text:", error);
+      ErrorHandlers.componentError("Failed to copy text to clipboard", error, {
+        component: "CopyButton",
+        action: "handleCopy",
+      });
       toast.error("Failed to copy text");
     }
   };

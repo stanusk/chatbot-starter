@@ -57,7 +57,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } = await supabaseClient.auth.getSession();
         setUser(session?.user || null);
       } catch (error) {
-        console.error("Error getting session:", error);
+        ErrorHandlers.authError("Error getting initial session", error, {
+          component: "AuthProvider",
+          action: "getSession",
+        });
       }
     };
 

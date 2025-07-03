@@ -46,3 +46,7 @@ Rules to be followed for analyzing, writing, debugging, planning, and refactorin
 - Use custom hooks for complex stateful logic
 - Extract reusable UI patterns into separate components
 - Keep business logic separate from presentation logic
+
+### Error Handling
+- **See [601-user-feedback-rules.mdc](mdc:.cursor/rules/601-user-feedback-rules.mdc#error-handling) for complete error handling guidelines**
+- **NEVER use `console.error`** - Always use centralized `ErrorHandlers` from `@/lib/error-handling`

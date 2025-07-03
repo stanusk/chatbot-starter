@@ -137,6 +137,20 @@ export function useChat({
       return;
     }
 
+    // Bounds checking: ensure messageIndex is within valid range
+    if (messageIndex < 0 || messageIndex >= messages.length) {
+      ErrorHandlers.validationError(
+        `Invalid messageIndex: ${messageIndex}. Must be between 0 and ${messages.length - 1}`,
+        "Unable to edit message. Please try again.",
+        {
+          component: "useChat",
+          action: "editMessage",
+          metadata: { messageIndex, messagesLength: messages.length }
+        }
+      );
+      return;
+    }
+
     // Create a new messages array with only messages up to the edited one
     // and replace the edited message with the new content
     const messagesToKeep = messages.slice(0, messageIndex);
@@ -155,6 +169,8 @@ export function useChat({
 
     // Use AI SDK's reload to trigger reprocessing from the current state
     // This should cause it to generate a new assistant response
+    // setTimeout is used to delay the reload to ensure state consistency
+    // and allow React to complete the state update before triggering the reload
     setTimeout(() => {
       reload();
     }, 100);

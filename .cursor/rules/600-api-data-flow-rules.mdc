@@ -33,10 +33,11 @@ User Input → API Route → AI Provider → Stream Response → Save to DB → 
 ```
 
 ### Error Handling
+- **See [601-user-feedback-rules.mdc](mdc:.cursor/rules/601-user-feedback-rules.mdc#error-handling) for complete error handling guidelines**
+- **API-specific**: Use `apiError`, `authError`, `supabaseError` with route name as component
+- **AI-specific**: Use `aiProviderError` for AI failures, `streamingError` for streaming issues
 - Handle AI provider failures gracefully with fallbacks
-- Use proper error boundaries for streaming errors
-- Provide user feedback for connection/AI failures
-- Log errors appropriately without exposing sensitive data
+- Return consistent 401/403 errors for auth failures
 
 ### State Management Principles
 - **Single Source of Truth**: Use one variable for each piece of state (avoid: selectedSessionId, sessionId, sessionIdRef, currentSessionId for same data)

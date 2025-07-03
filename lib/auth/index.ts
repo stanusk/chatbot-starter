@@ -6,6 +6,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { ApiErrors } from "@/lib/api/error-responses";
+import { ErrorHandlers } from "@/lib/error-handling";
 import type { User } from "@supabase/supabase-js";
 
 /**
@@ -52,13 +53,19 @@ export async function getAuthenticatedUser(): Promise<User | null> {
     const { data: { user }, error } = await supabase.auth.getUser();
     
     if (error) {
-      console.error("Authentication error:", error.message);
+      ErrorHandlers.authError("Authentication error during getUser", error, {
+        component: "getAuthenticatedUser",
+        action: "getUser",
+      });
       return null;
     }
 
     return user;
   } catch (error) {
-    console.error("Error getting authenticated user:", error);
+    ErrorHandlers.authError("Error getting authenticated user", error, {
+      component: "getAuthenticatedUser",
+      action: "createAuthClient",
+    });
     return null;
   }
 }

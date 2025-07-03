@@ -101,9 +101,10 @@ function Child() {
 
 ## Error Handling Integration
 
-- Global errors use `useUIContext().setGlobalError()`
+- **See [601-user-feedback-rules.mdc](mdc:.cursor/rules/601-user-feedback-rules.mdc#error-handling) for complete error handling guidelines**
+- **Context-specific**: Use appropriate ErrorHandlers with context name as component
+- Global errors use `useUIContext().setGlobalError()` for UI-level error display
 - Context errors are caught by ErrorBoundary wrapper
-- Always provide user-friendly error messages, not technical details
 
 ## Performance Considerations
 
