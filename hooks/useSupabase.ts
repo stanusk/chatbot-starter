@@ -6,6 +6,11 @@ import type { ChatSession, ChatMessage } from "@/lib/database";
 import { ErrorHandlers } from "@/lib/error-handling";
 import type { UseSupabaseReturn } from "@/types/hooks";
 
+/**
+ * Provides a set of asynchronous functions for managing chat sessions and messages, including creation, retrieval, updating, and message saving, along with a utility for generating session titles.
+ *
+ * Returns an object containing methods for session operations, message operations, and title generation, all with integrated error handling.
+ */
 export function useSupabase(): UseSupabaseReturn {
   const createSession = useCallback(async (_userId?: string, title?: string): Promise<ChatSession | null> => {
     try {
