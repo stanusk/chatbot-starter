@@ -201,8 +201,12 @@ export function Messages({ messages, status, onEditMessage }: MessagesProps) {
   };
 
   const getMessageText = (message: UIMessage): string => {
-    const textParts = message.parts.filter((part: any) => part.type === "text");
-    return textParts.map((part: any) => part.text).join("");
+    return message.parts
+      .filter(
+        (part): part is { type: "text"; text: string } => part.type === "text"
+      )
+      .map((part) => part.text)
+      .join("");
   };
 
   // Find the index of the last user message
@@ -280,7 +284,6 @@ export function Messages({ messages, status, onEditMessage }: MessagesProps) {
                       return (
                         <ReasoningMessagePart
                           key={`${message.id}-${partIndex}`}
-                          // @ts-expect-error export ReasoningUIPart
                           part={part}
                           isReasoning={
                             status === "streaming" &&

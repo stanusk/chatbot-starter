@@ -50,8 +50,10 @@ export interface MessagesProps {
 // Message part types
 export interface ReasoningPart {
   type: "reasoning";
-  reasoning: string;
-  details: Array<{ type: "text"; text: string }>;
+  details: Array<
+    | { type: "text"; text: string; signature?: string }
+    | { type: "redacted"; data: string }
+  >;
 }
 
 export interface ReasoningMessagePartProps {
