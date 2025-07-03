@@ -1,6 +1,9 @@
 // API utilities
 export * from "./api";
 
+// Authentication utilities
+export * from "./auth";
+
 // Database utilities
 export * from "./database";
 

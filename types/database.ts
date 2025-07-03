@@ -9,6 +9,7 @@ export interface ChatSession {
   updated_at: string;
   title?: string;
   metadata?: Record<string, unknown>;
+  trash?: boolean;
 }
 
 export interface ChatMessage {

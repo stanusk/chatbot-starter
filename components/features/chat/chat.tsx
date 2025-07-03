@@ -26,6 +26,7 @@ export function Chat({
     status,
     isGeneratingResponse,
     sendMessage,
+    editMessage,
     stop,
   } = useChat({
     selectedSessionId,
@@ -37,7 +38,8 @@ export function Chat({
   return (
     <div
       className={cn(
-        "px-4 md:px-0 pb-4 pt-8 flex flex-col h-dvh items-center w-full max-w-3xl",
+        "px-4 md:px-0 pb-4 pt-8 flex flex-col items-center w-full max-w-3xl",
+        "h-[calc(100vh-73px)]", // Subtract header height (73px from min-h-[73px])
         {
           "justify-between": messages.length > 0,
           "justify-center gap-4": messages.length === 0,
@@ -45,7 +47,11 @@ export function Chat({
       )}
     >
       {messages.length > 0 ? (
-        <Messages messages={messages} status={status} />
+        <Messages
+          messages={messages}
+          status={status}
+          onEditMessage={editMessage}
+        />
       ) : (
         <div className="flex flex-col gap-0.5 sm:text-2xl text-xl w-full">
           <div className="flex flex-row gap-2 items-center">

@@ -5,40 +5,41 @@
 
 import { Message, generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { saveChatMessage, createChatSession, updateChatSessionTitle, generateChatTitle, getChatMessages, getChatSession } from "@/lib/database";
+import { saveChatMessage, createChatSession, updateChatSessionTitle, getChatMessages, getChatSession } from "@/lib/database";
 import type { AIStreamResult } from "@/types/api";
 import { ErrorHandlers } from "@/lib/error-handling";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Session management logic
  */
-export async function handleSessionManagement(sessionId: string | undefined, userId: string | undefined): Promise<string | null> {
+export async function handleSessionManagement(
+  supabase: SupabaseClient,
+  sessionId: string | undefined
+): Promise<string | null> {
   // If session ID provided, use it
   if (sessionId) {
     return sessionId;
   }
   
-  // Only create new session if we have a user
-  if (userId) {
-    try {
-      const session = await createChatSession(userId, "New Chat");
-      return session.id;
-    } catch (error) {
-      ErrorHandlers.supabaseError("Failed to create chat session", error, {
-        userId,
-        component: "handleSessionManagement",
-        action: "createChatSession"
-      });
-    }
+  // Always try to create session - RLS will handle user context automatically
+  try {
+    const session = await createChatSession(supabase, "New Chat");
+    return session.id;
+  } catch (error) {
+    ErrorHandlers.supabaseError("Failed to create chat session", error, {
+      component: "handleSessionManagement",
+      action: "createChatSession"
+    });
+    return null;
   }
-  
-  return null;
 }
 
 /**
  * Message persistence logic for user messages
  */
 export async function handleUserMessagePersistence(
+  supabase: SupabaseClient,
   messages: Message[],
   sessionId: string | null
 ): Promise<void> {
@@ -50,6 +51,7 @@ export async function handleUserMessagePersistence(
   try {
     // Save the user message
     await saveChatMessage(
+      supabase,
       sessionId,
       "user",
       userMessage.content,
@@ -70,7 +72,12 @@ export async function handleUserMessagePersistence(
 /**
  * AI-powered title generation logic with fallback
  */
-export async function handleTitleGeneration(sessionId: string, userMessage: string, assistantMessage: string): Promise<void> {
+export async function handleTitleGeneration(
+  supabase: SupabaseClient,
+  sessionId: string,
+  userMessage: string,
+  assistantMessage: string
+): Promise<void> {
   try {
     let newTitle: string;
     
@@ -114,7 +121,7 @@ Return only 2-3 words, no quotes, same language as user.`
       newTitle = words.join(' ');
     }
     
-    await updateChatSessionTitle(sessionId, newTitle);
+    await updateChatSessionTitle(supabase, sessionId, newTitle);
   } catch (error) {
     ErrorHandlers.supabaseError("Failed to update chat title", error, {
       sessionId,
@@ -128,6 +135,7 @@ Return only 2-3 words, no quotes, same language as user.`
  * Message persistence logic for assistant messages
  */
 export async function handleAssistantMessagePersistence(
+  supabase: SupabaseClient,
   sessionId: string | null,
   result: AIStreamResult,
   selectedModelId: string,
@@ -151,6 +159,7 @@ export async function handleAssistantMessagePersistence(
       : Math.min(100, result.text.length / 10);
 
     await saveChatMessage(
+      supabase,
       sessionId,
       "assistant",
       result.text,
@@ -167,21 +176,21 @@ export async function handleAssistantMessagePersistence(
 
     // Check if we should generate an AI title (only for sessions that still have "New Chat" title)
     try {
-      const session = await getChatSession(sessionId);
+      const session = await getChatSession(supabase, sessionId);
       
       // Only generate title if session still has "New Chat" title (indicating first conversation)
       if (session && session.title === "New Chat") {
         // Use the provided user message content if available
         if (userMessageContent) {
           // Generate AI title using the user message and this assistant response
-          await handleTitleGeneration(sessionId, userMessageContent, result.text);
+          await handleTitleGeneration(supabase, sessionId, userMessageContent, result.text);
         } else {
           // Fallback: Get the first user message from database
-          const messages = await getChatMessages(sessionId);
+          const messages = await getChatMessages(supabase, sessionId);
           const userMessages = messages.filter(msg => msg.role === "user");
           
           if (userMessages.length > 0) {
-            await handleTitleGeneration(sessionId, userMessages[0].content, result.text);
+            await handleTitleGeneration(supabase, sessionId, userMessages[0].content, result.text);
           }
         }
       }

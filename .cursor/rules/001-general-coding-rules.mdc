@@ -27,6 +27,11 @@ Rules to be followed for analyzing, writing, debugging, planning, and refactorin
 - Use [003-refactoring-rules.mdc](mdc:.cursor/rules/003-refactoring-rules.mdc) when files exceed ideal size
 - Name functions based on what they do, not what they react to
 
+## Simplicity Principles
+- **Prefer simple solutions**: Before adding complex state management, try simpler approaches first
+- **Avoid premature abstractions**: Don't create complex patterns until you have 3+ use cases
+- **Use platform defaults**: Prefer `null` over custom constants, direct props over complex context patterns
+
 ### Project Structure
 - Keep components focused on single responsibility
 - Place shared components in `components/` directory
@@ -41,3 +46,7 @@ Rules to be followed for analyzing, writing, debugging, planning, and refactorin
 - Use custom hooks for complex stateful logic
 - Extract reusable UI patterns into separate components
 - Keep business logic separate from presentation logic
+
+### Error Handling
+- **See [601-user-feedback-rules.mdc](mdc:.cursor/rules/601-user-feedback-rules.mdc#error-handling) for complete error handling guidelines**
+- **NEVER use `console.error`** - Always use centralized `ErrorHandlers` from `@/lib/error-handling`

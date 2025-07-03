@@ -1,6 +1,6 @@
 import { myProvider } from "@/lib/models";
 import { smoothStream, streamText } from "ai";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { 
   handleSessionManagement, 
   handleUserMessagePersistence, 
@@ -8,6 +8,8 @@ import {
   createStreamingConfig 
 } from "@/lib/api";
 import type { ChatRequestBody } from "@/types/api";
+import { validateUUIDForAPI } from "@/utils/validation";
+import { createAuthenticatedSupabaseClient } from "@/lib/auth/server";
 
 export async function POST(request: NextRequest) {
   const {
@@ -15,14 +17,27 @@ export async function POST(request: NextRequest) {
     selectedModelId,
     isReasoningEnabled,
     sessionId,
-    userId,
   }: ChatRequestBody = await request.json();
 
+  // Validate sessionId format if provided
+  if (sessionId) {
+    const uuidValidation = validateUUIDForAPI(sessionId, "Session ID");
+    if (!uuidValidation.isValid) {
+      return NextResponse.json(
+        { error: uuidValidation.error },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Create authenticated client
+  const supabase = await createAuthenticatedSupabaseClient();
+
   // Handle session management
-  const currentSessionId = await handleSessionManagement(sessionId, userId);
+  const currentSessionId = await handleSessionManagement(supabase, sessionId);
 
   // Handle user message persistence
-  await handleUserMessagePersistence(messages, currentSessionId);
+  await handleUserMessagePersistence(supabase, messages, currentSessionId);
 
   const streamingConfig = createStreamingConfig(selectedModelId, isReasoningEnabled);
   
@@ -42,6 +57,7 @@ export async function POST(request: NextRequest) {
       
       // Handle assistant message persistence
       await handleAssistantMessagePersistence(
+        supabase,
         currentSessionId,
         result,
         selectedModelId,

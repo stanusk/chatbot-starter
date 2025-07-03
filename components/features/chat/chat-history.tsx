@@ -4,6 +4,7 @@ import { forwardRef, useImperativeHandle, useState, useEffect } from "react";
 import { useChatHistory } from "@/hooks";
 import { useChatContext } from "@/contexts";
 import { ChatHistoryItem } from "./chat-history-item";
+import { ErrorHandlers } from "@/lib/error-handling";
 import type { ChatHistoryProps, ChatHistoryRef } from "@/types/components";
 
 export type { ChatHistoryRef };
@@ -21,6 +22,39 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
     } = useChatHistory({
       onSessionSelect,
     });
+
+    const handleDeleteSession = async (sessionId: string) => {
+      try {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete session");
+        }
+
+        // Check if we're deleting the currently active session
+        const isDeletingActiveSession = currentSessionId === sessionId;
+
+        // Refresh the sessions list silently to update the UI
+        await refreshSessionsSilently();
+
+        // If we deleted the current session, start a new chat
+        if (isDeletingActiveSession) {
+          startNewChat();
+        }
+      } catch (error) {
+        ErrorHandlers.apiError("Error deleting session", error, {
+          component: "ChatHistory",
+          action: "handleDeleteSession",
+          sessionId,
+        });
+        throw error; // Re-throw to let the component handle the error display
+      }
+    };
 
     const [isClient, setIsClient] = useState(false);
 
@@ -94,9 +128,7 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
 
         {/* Placeholder entry when hasPlaceholder is true */}
         {hasPlaceholder && currentSessionId === null && (
-          <div
-            className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700"
-          >
+          <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700">
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium truncate">New Chat</h4>
@@ -115,6 +147,7 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(
             isSelected={currentSessionId === session.id}
             onClick={() => handleSessionClick(session)}
             formatDate={formatDate}
+            onDelete={handleDeleteSession}
           />
         ))}
       </div>

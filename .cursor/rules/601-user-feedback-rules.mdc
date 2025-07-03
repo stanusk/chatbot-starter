@@ -1,11 +1,11 @@
 ---
-description: Rules for providing appropriate user feedback in this chatbot application.
+description: Rules for providing appropriate user feedback and error handling in this chatbot application.
 globs: 
 alwaysApply: false
 ---
-# User Feedback Rules
+# User Feedback & Error Handling Rules
 
-Rules for providing appropriate user feedback in this chatbot application.
+Rules for providing appropriate user feedback and centralized error handling in this chatbot application.
 
 ## Context
 - When handling loading states during AI responses
@@ -21,16 +21,34 @@ Rules for providing appropriate user feedback in this chatbot application.
 - Handle loading states gracefully during network issues
 
 ### Error Handling
-- Use centralized `ErrorHandlers` from `@/lib/error-handling` for all errors
+
+<critical>
+**NEVER use `console.error`** - Always use centralized `ErrorHandlers` from `@/lib/error-handling` for all errors
+</critical>
+
+#### Core Principles
 - Always provide context: `{ component: "ComponentName", action: "actionName" }`
-- Use specific error types: `authError`, `supabaseError`, `aiProviderError`, `validationError`
-- Display clear error messages for AI provider failures
-- Show authentication errors with actionable guidance
-- Handle network errors with retry options
-- Provide fallback responses when AI is unavailable
+- Use specific error types based on the error category
+- Include relevant metadata for debugging
+- Provide user-friendly error messages
+- Handle errors consistently across the entire application
+
+#### Available Error Types
+- `authError` - Authentication/authorization failures
+- `supabaseError` - Database operations
+- `aiProviderError` - AI service failures
+- `validationError` - User input validation
+- `componentError` - UI component errors
+- `apiError` - General API failures
+- `networkError` - Network connectivity issues
+- `streamingError` - AI streaming interruptions
+- `permissionError` - Permission/access control failures
+- `unknownError` - Fallback for unexpected errors
+
+#### Standard Patterns
 
 ```typescript
-// Standard pattern for all error handling
+// Basic error handling pattern
 try {
   await operation();
 } catch (error) {
@@ -40,7 +58,41 @@ try {
     metadata: { relevantContext: "value" }
   });
 }
+
+// Validation errors with custom user message
+ErrorHandlers.validationError(
+  "Email validation failed",
+  "Please enter a valid email address",
+  { component: "AuthForm", action: "validateEmail" }
+);
+
+// API route error handling
+ErrorHandlers.authError("Authentication failed", error, {
+  component: "APIRouteName",
+  action: "requireAuth",
+  userId: user?.id
+});
+
+// Component error handling
+ErrorHandlers.componentError("Failed to copy text", error, {
+  component: "CopyButton",
+  action: "handleCopy"
+});
+
+// AI/Streaming error handling
+ErrorHandlers.aiProviderError("AI service unavailable", error, {
+  component: "ChatHandler",
+  action: "streamResponse",
+  sessionId: session.id
+});
 ```
+
+#### Context-Specific Guidelines
+- **API Routes**: Use `apiError`, `authError`, `supabaseError` with route name as component
+- **React Components**: Use `componentError`, `validationError` with component name
+- **Context Providers**: Use appropriate error type with context name as component
+- **Database Operations**: Always use `supabaseError` with operation details
+- **AI Operations**: Use `aiProviderError` or `streamingError` with session context
 
 ### Success Feedback
 - Avoid success messages for expected chat operations

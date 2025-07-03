@@ -32,10 +32,16 @@ export const markdownComponents: Partial<Components> = {
       </span>
     );
   },
-  a: ({ children, ...props }) => {
+  a: ({
+    children,
+    ...props
+  }: {
+    children?: React.ReactNode;
+    href?: string;
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     return (
-      // @ts-expect-error - Link component expects href prop from markdown-parsed anchor tags
       <Link
+        href={props.href || "#"}
         className="text-blue-500 hover:underline"
         target="_blank"
         rel="noreferrer"

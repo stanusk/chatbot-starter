@@ -8,14 +8,6 @@ import { UseChatHelpers } from "@ai-sdk/react";
 import { ChatSession, ChatMessage, MessageRole } from "./database";
 import { ModelID } from "./models";
 
-// Auth hook types
-export interface UseAuthReturn {
-  user: User | null;
-  loading: boolean;
-  signIn: (email: string) => Promise<void>;
-  signOut: () => Promise<void>;
-}
-
 // Chat hook types
 export interface UseChatOptions {
   sessionId?: string;
@@ -61,7 +53,7 @@ export interface UseChatHistoryReturn {
 export interface UseSupabaseReturn {
   // Session operations
   createSession: (userId?: string, title?: string) => Promise<ChatSession | null>;
-  getSessions: (userId?: string) => Promise<ChatSession[]>;
+  getSessions: () => Promise<ChatSession[]>;
   updateSessionTitle: (sessionId: string, title: string) => Promise<boolean>;
   
   // Message operations
